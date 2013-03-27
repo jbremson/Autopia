@@ -1,0 +1,18 @@
+<VirtualHost *:8080>
+	ServerAdmin USER3000@gmail.com
+	ServerName ##sub##.XXXX.com
+	DocumentRoot /home/USER/sites/##sub##/trunk/
+	ErrorLog /home/USER/logs/##sub##/apache.error.log
+	CustomLog /home/USER/logs/##sub##/apache.access.log combined
+	WSGIDaemonProcess ##sub##.autopiagame.com user=www-data group=www-data threads=25
+	WSGIProcessGroup ##sub##.autopiagame.com
+
+	Redirect /site_media http://##sub##.autopiagame.com/site_media
+
+	WSGIScriptAlias / /home/USER/sites/##sub##/trunk/auto/apache/auto.wsgi
+	
+	<Directory /home/USER/sites/##sub##/trunk/auto/apache>
+		Order allow,deny
+		Allow from all
+	</Directory>
+</VirtualHost>

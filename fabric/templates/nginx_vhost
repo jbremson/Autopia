@@ -1,0 +1,30 @@
+ server {
+    	listen 	XX;
+	server_name  ##sub##.autopiagame.com;
+
+	location /site_media {
+		root /home/USER/dev;
+		index index.html index.htm; 
+	}
+
+	location / {
+		proxy_pass    http://##sub##.autopiagame.com:XXX;
+		proxy_set_header    X-Real-IP  $remote_addr;
+		proxy_set_header	X-Which-Config ##sub##.autopiagame.com;
+		proxy_set_header	X-Forwarded-Host ##sub##.autopiagame.com;
+
+    	}
+    access_log	/home/USER/logs/nginx.access.log;
+    error_log	/home/USER/logs/nginx.error.log;
+    sendfile        on;
+    tcp_nopush     on;
+    keepalive_timeout  2;
+    #keepalive_timeout  65;
+    tcp_nodelay        on;
+    gzip  on;
+    gzip_comp_level 2;
+    gzip_proxied any;
+    gzip_types text/plain text/css application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+    gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+    include /etc/nginx/conf.d/*.conf;
+}
