@@ -1,0 +1,70 @@
+
+  <div style="width:340px;float:left;background-color:aqua; height:70px">
+
+     The following players have completed their turns:<br>
+
+     {% if finished %}
+     {% for player in finished %}
+         <b>{{  player.user.username }}</b> &nbsp;
+     {% endfor %}
+     {% endif %}
+
+     <br>
+     <form action="{% url complete %}" method="POST">{% csrf_token %}
+         <input type="submit" value="Complete Turn">
+        </form>
+
+     </div>
+
+        <div style="padding:10;background-color:gold;left:340px;height:70px;width:210px">
+            Make a <a href="{% url comment %}">comment.</a>
+
+    </div>
+
+
+    <br>
+    <p>
+    <a href="http://autopiagame.com:8081/auto" target="_blank">Bug Tracker</a>
+</p>
+   <style>
+          #message_window{
+        visibility:hidden;
+        z-index:100;
+        background-color:darkgreen;
+        height:125px;
+        width:520px;
+        padding:10px;
+        border: 2px black solid;
+
+
+    }
+
+        .send_message_link{
+            text-decoration:underline
+
+
+        }
+    </style>
+    <div id="message_window" style='color:white'>
+        <div id="message_window_closer" style='color:white;float:right'>[x]</div>
+        <div style="color:white">Messaging Window</div>
+        To: <select id="receiver_select">
+               {% for u in users %}
+
+               <option name='{{u.username}}' value="{{u.username}}">{{u.username}}</option>
+               {% endfor %}
+
+           </select>
+           <textarea id="write_box" rows="4" cols="60">
+
+
+           </textarea>
+
+        <div style="float:right;padding:10px"><input type="button" id="send_message" value="Send Message">
+        </div>
+
+
+        </br>
+
+
+    </div>

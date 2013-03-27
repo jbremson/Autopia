@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+        <head><title>Comment</title></head>
+{% block usernav %}
+{% include user.nav_file %}
+{% endblock %}
+
+{% block content %}
+<h1> Comments</h1>
+
+<h3>Leave comments about the game here.</h3>
+
+<form method="POST">{% csrf_token %}
+
+
+<textarea name="comment" rows="12" cols="60"></textarea>
+
+<br>
+
+
+<input type="submit" value="Submit Comment" onClick="alert('Thanks for your feedback');">
+
+</form>
+
+
+{% endblock %}

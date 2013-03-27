@@ -1,0 +1,10 @@
+  <ul>
+      <li>Funds: ${{user.balance|floatformat:"3"}} M</li>
+{#      <li><a href="/fp/transactions">Last Turn Income: ${{last_income|floatformat:"3"}} M</a></li>#}
+      <li><a href="/fp/transactions">Total Game Income: ${{game_income|floatformat:"3"}} M</a></li>
+      {% if user.check_messages %}
+      <li> <div style="color:red"><a  href="/chat_log">***New Messages***</a></div></li>
+
+      {% endif %}
+
+  </ul>

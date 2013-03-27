@@ -1,0 +1,590 @@
+{% include 'global/includes/header.html' %}
+<style type="text/css">
+    #loader{
+        position:absolute;
+        top:600px;
+        left:150px;
+    }
+
+
+    #toggle_asset_text{
+        color:darkgreen;
+        text-decoration:underline}
+    }
+
+</style>
+<script type="text/javascript">
+
+    var  MY = {}
+    MY.active_str = 'Activate for next turn.'
+    MY.inactive_str = 'Deactivate for next turn.'
+    MY.jg =jGCharts.Api()
+    MY.jg2 = jGCharts.Api()
+    MY.jg3 = jGCharts.Api()
+
+        function plot_assets(){
+            var fuels = Array('gas','diesel','h2','elec')
+            var data = Array()
+            var legend = Array("On","Off")
+            var title = "Refinery Status (M gge)"
+            var axis_labels = fuels
+            var margin_data = Array()
+            var op_data = Array()
+            for (i in fuels){
+                var fuel = fuels[parseInt(i)]
+                active = parseFloat($("#active_"+fuel+"_cap").html())
+                if (isNaN(active)){
+                    active = 0
+                }
+                cap = parseFloat($("#"+fuel+"_cap").html())
+                if (isNaN(cap)){
+                    cap = 0
+                }
+                data.push(Array(active,(cap-active)))
+                // margin data collectino
+                var margin = 100 * parseFloat($("#"+fuel+"_margin").html())
+                if (isNaN(margin)){
+                    margin =0
+                }
+                margin_data.push(margin)
+
+                var op_cost = parseInt($("#" + fuel + "_op_cost").html())
+                if (isNaN(op_cost)){
+                    op_cost =0
+                }
+                op_data.push(op_cost)
+            }
+            $("#summary_chart").html("")
+            $('<img>').attr('src',MY.jg.make({data:data,type:'bvs',title:title,
+                    title_size:20,
+                    axis_labels:axis_labels,bar_spacing:10,legend:legend})).appendTo("#summary_chart")
+
+            $('<img>').attr('src',MY.jg2.make({data:margin_data,title:"Margin %",
+                        title_size:20, axis_labels:axis_labels,bar_spacing:10})).appendTo("#summary_chart")
+            $('<img>').attr('src',MY.jg3.make({data:op_data,title:"Operating Cost ($k)",
+                        title_size:20, axis_labels:axis_labels,bar_spacing:10})).appendTo("#summary_chart")
+        }
+
+        function convert_gas_diesel(id){
+            //convert the plant from gas to diesel or diesel to gas.
+            fuel = $("#convert_"+id +" :selected").text()
+            $(function(){
+                $("#loader").show()
+                //$.get("/fp/manage_refinery?asset_id="+id,
+                $.post("{% url app.views.convert_gas_diesel %}",{'asset_id':id,'fuel':fuel},
+                        function(data){
+                            if (data==-1){
+                                alert("failed")
+                            } else {
+                                act(id,"gas")
+                                act(id,"diesel")
+                            }
+                            $("#loader").hide()
+                            $("#summary_stats").attribute('background','white')
+                        });
+
+            });
+
+        }
+
+        function replace_refinery(rm_id,asset_id){
+            s = {arg:rm_id, asset_id:asset_id, fxn:'replace_refinery'}
+
+            $(function(){
+                $.get("{% url ajax_server %}", s,
+                    function(data){
+                        if (data.status == -1){
+                            alert("ERROR: " + data.msg )
+                        } else {
+                            message = "Replace this refinery?\n\nReplacement Cost: " + String(data.ref_cost) + " k\n" +
+                                    "Build Time: " + parseInt(data.build_time)  + " turns\n" +
+                                    "Payback Time (estimate)*: " + (parseInt(data.build_time)+ parseFloat(data.payback)/4.0) + " turns\n\n\n" +
+                                    "* Assumes full usage and current fuel prices."
+                            out = confirm(message)
+                            if (out){
+                                $.post("{% url ajax_server %}", s,
+                                    function(vals){
+                                        if (vals.status==-1){
+                                            alert("ERROR: " + String(vals.msg))
+                                        } else {
+                                            alert("New refinery is being built.")
+                                            window.location.reload()
+                                        }
+                                    },"json");
+                            }
+
+
+                        }
+                    },"json"
+                )
+
+            });
+
+        }
+
+        function sell(id){
+            // sets up a refinery sale
+            //show the price field
+            var checked = $('#sell_'+id+'[type=checkbox]').is(':checked');
+
+            $("#sell_price_"+id).attr('disabled',false);
+            $("#sell_price_"+id).val('')
+            var str = "#sell_price_"+id
+            var str2 = "#list_"+id
+            if (checked==true){
+                $(str).show('slow');
+                $(str2).show('slow');
+            } else {
+                //alert("need to ajax delist the re            var send={'asset_id':id, 'price':$("#sell_price_"+id).val(),'fxn':"list"}
+                if ($("#sell_price_"+id).val()!=""){
+                    var send={'asset_id':id, 'fxn':"delist"}
+                    $.post("{% url app.views.list_refinery %}",send,
+                                       function(data){
+                                           if (data==-1){
+                                               alert("failed")
+                                           } else {
+                                               var str2 = "#list_"+id
+
+                                           }
+                                       });
+                }
+                $(str).hide('slow')
+                $(str2).hide('slow')
+            }
+        }
+
+        function onsale(id){
+            //ajax to actually put the refinery on sale
+            // list id by entering it as for sale in the asset table and giving it a price
+            // button has been clicked here
+            var send={'asset_id':id, 'price':$("#sell_price_"+id).val(),'fxn':"list"}
+
+            regexp = new RegExp("^[1-9]+[0-9]*\s*$")
+           if(!send['price'].match(regexp)){
+                    alert("Illegal price. Price must be a postive integer.")
+           return (false);
+            }
+           $.post("{% url app.views.list_refinery %}",send,
+                                   function(data){
+                                       if (data==-1){
+                                           alert("failed")
+                                       } else {
+                                           var str2 = "#list_"+id
+                                           $("#sell_price_"+id).attr('disabled',true);
+                                           
+                                           $(str2).hide('fast')
+
+                                       }
+                                   },"json");
+
+        }
+        function act(id,arg){
+            //manages refinery scheduling (on/off)
+            //$('input:radio[name=bar]:checked').val(); - radio value
+            //action options - schedule - switch from active to inactive, vice versa
+            //              - gas - update gas row in summary table
+            //              - diesel - update diesel row in summary table
+            var send ={'asset_id':id}
+            if (arg=="schedule"){
+               send['arg']=$('input:radio[name=status_n'+id+']:checked').val();
+               if (send['arg']=="eliminated"){
+                   var out = confirm("Plant will be eliminated. This is irreversible. Proceed?")
+                    if (out==false){
+                        alert("Elimination cancelled.")
+                        window.location.reload()
+                        return false
+                    }
+               }
+               send['fxn']="schedule"
+            } else {
+                //automatically, fxn is an update, arg is a fuel type of
+                // gas,diesel,h2,elec
+                send['fxn']="update"
+                send['arg']=arg
+            }
+
+            $("#summary_stats").css('background-color','green')
+            $(function(){
+              var out = $("#summary_stats").position()
+              var x = out.left
+              var y = out.top
+            $("#loader").css({'position':'absolute','left':x+100,'top':y+80})
+                $("#loader").show(speed="slow")
+                //$.get("/fp/manage_refinery?asset_id="+id,
+                $.post("{% url app.views.manage_refinery %}",send,
+                        function(data){
+                            if (data==-1){
+                                alert("failed")
+                            } else {
+                                if (data.message=="reload"){
+                                    window.location.reload()
+                                    return true
+                                }
+                                fuel = data.fuel
+                                change_val("#"+fuel+"_cap",data.capacity + " M")
+                                str = "#active_"+fuel+"_cap"
+                                change_val(str,data.active_capacity + " M");
+                                str = "#"+fuel+"_margin"
+                                change_val(str,data.margin)
+                                change_val("#"+fuel+"_op_cost",data.op_cost)
+                            }
+                            $("#loader").hide(speed='slow')
+                            $("#summary_stats").css('background-color','white')
+                            plot_assets()
+                        },"json");
+
+            });
+        };
+
+        $(document).ready(function(){
+            act(0,"gas")
+            act(0,"diesel")
+            act(0,"elec")
+            act(0,"h2")
+            $(".sell_price").each(function(index,item){
+                if ($(item).text()!='' || $(item).val()!='-1'){
+
+
+                    $(item).show()
+                    $(item).attr('disabled',true)
+                } else {
+                    $(item).hide()
+                }
+
+            })
+            $("#loader").hide()
+            $("#assets").dataTable({})
+            // set warn expiry
+            $("#fp_asset_tips").hide()
+
+            //$("#summary_stats").hide()
+            
+            $("#toggle_asset_text").click(function(){
+                $("#fp_asset_tips").toggle("slow")
+                if ($("#toggle_asset_text").text()=="[hide instructions]"){
+                    $("#toggle_asset_text").text('[show instructions]')
+                } else {
+
+                    $("#toggle_asset_text").text('[hide instructions]')
+                }
+                });
+
+            $(".replace").click(function(){
+                replace_refinery(this.id.split('_')[2],this.id.split('_')[3])
+
+            });
+
+            $(".replace_True").each(function(){
+                $(this).hide()
+                $(this).parent().append("-Replaced-")
+            })
+
+        });
+
+
+</script>
+
+{% load auto_extras %}
+
+<style>
+    #turn_summary_div{
+        position: absolute;
+        width: 450px;
+        z-index:100;
+        top: 10px;
+        left:150px;
+        background:#888;
+    }
+
+    #container{
+        position: relative;
+        left: -180px;
+        /**left:40px; **/
+        /*top:120px;*/
+        width: 600px;
+            margin: auto;
+              padding:0;
+              display: table;
+              border: 1px solid black;
+              }
+
+    .row{
+        display: table-row;
+    }
+
+    .left {
+            width:400;
+            padding:1em;
+            background: #EEF;
+            display: table-cell;
+            opacity:1
+            }
+
+        .right {
+            width:200;
+            padding:1em;
+            background:#FEE;
+        display: table-cell;
+            opacity:1;
+    }
+
+    #vp_plots{
+        position: absolute;
+        top:140px;
+        z-index:100;
+        left:40px;
+        background:#ffffff;
+        opacity:100;
+    }
+
+
+</style>
+</head>
+    <body>
+
+
+    <div id="container">
+        <div class="row">
+            <div class="left" style="background:#DDD">
+                <img src="{{ revenue_chart }}">
+                {%  for prompt in prompts %}
+                    <p>{{ prompt.message }}</p>
+
+                {%  endfor %}
+            </div>
+            <div class="right" style="background:#DDD"></div>
+
+        </div>
+     <div class="row">
+          <div class="left">
+            {% include 'fp/includes/user_info.html' %}
+          </div>
+
+          <div class="right">
+{#              <div id="vp_plots_toggle" ><input type="button" value="Performance Charts"></div>#}
+{#              <br>#}
+{#              <div id="ts_toggle"> <input type="button" value="Performance Data"></div>#}
+          </div>
+
+     </div>
+    </div> <!-- container end -->
+
+<h1>Fuel Producer</h1>
+
+<h2>Assets Under Construction</h2>
+{% if building %}
+<table id="building">
+    <thead>
+    <tr><th><a class="tipsy" href="#" title="The type of fuel produced by the refinery: gas, diesel, h2 (hydrogen),
+    or electricity. A refinery can be switched between gas and diesel.">Fuel</th>
+
+        <th><a href="#" class="tipsy" title="Quantity produced by the refinery per turn in thousands of gallons or gallon
+        equivalents (gge)">Cap.</th><th><a href="#" class="tipsy" title="How much the refinery cost initially
+        in thousands of dollars.">Purchase Cost(k)</th><th><a href="#" class="tipsy" title="The profit margin you
+        make on fuel sold from your active refineries.">Margin</th><th> Active Yr.
+    </th><th><a href="#" class="tipsy" title="To put a refinery for sale check the box, enter a value (in thousands)
+     and push the 'list' button. To delist, uncheck the box.">Put for Sale</a></th></tr>
+
+    </thead>
+
+    <tbody>
+    {% for a in building %}
+        <tr><td>{{ a.refinery.fuel }}</td><td>{{ a.refinery.capacity|times4 }}</td><td>{{ a.cost }}</td>
+        <td>{{ a.refinery.margin }}</td>
+       <td>{{ a.activation_turn|to_year }}</td>
+                    <td><input type="checkbox" name="sell_{{ a.id }}" id="sell_{{ a.id }}" {{ a.for_sale|checked:"True"}} onchange="sell({{ a.id }})">
+            <input  type="text" class="sell_price" style="display:none" id="sell_price_{{ a.id }}" size="4" value="{{ a.sale_price }}">
+            <input type="button" style="display:none" value="list {{ a.id }}" id="list_{{ a.id }}" onclick="onsale({{a.id}})">
+            </td>
+
+        </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+
+ -None-
+
+ {% endif %}
+
+<h2>Active Refineries</h2>
+<table>
+<tr>
+<td width="70%" valign="top">
+<h3>Asset Management</h3>
+
+<div id="toggle_asset_text">[show instructions]</div>
+<div id="fp_asset_tips">
+Maximize profits by properly guessing your share of consumer fuel demand for gas, diesel, hydrogen and electricity.
+
+<ul>
+    <li>High margin refineries generate the best profits.</li>
+    <li>Deactivate, sell or  eliminate excess refining capacity to reduce costs and improve profits.</li>
+    <li>A surplus of a fuel will drive prices down and reduce profits.</li>
+    <li>A shortage of a fuel will drive prices up but will bring in outside producers, reducing profits.</li>
+    <li>Replace your refineries appropriately. Refineries with their 'life' entry in yellow are entering their
+    final years of service, but can be replaced without a loss of capacity. When the 'life' field is red they
+    may not be replaceable in time to avoid a capacity loss.</li>
+
+</ul>
+
+</div>
+
+
+    <div class="spacer"></div>
+<table id="assets">
+     <thead>
+    <tr class="padder"><th><a class="tipsy" href="#" title="The type of fuel produced by the refinery: gas, diesel, h2 (hydrogen),
+    or electricity. A refinery can be switched between gas and diesel.">Fuel</th>
+
+        <th><a href="#" class="tipsy" title="Quantity produced by the refinery per turn in thousands of gallons or gallon
+        equivalents (gge)">Cap.</th><th><a href="#" class="tipsy" title="How much the refinery cost initially
+        in thousands of dollars.">Cost </th><th><a href="#" class="tipsy" title="The profit margin you
+        make on fuel sold from your active refineries.">Margin</th><th>Status</th>
+        <th><a href="#" class="tipsy" title="Remaining operating life of the refinery in years.">Life Remaining </th>
+
+        <th><a href="#" class="tipsy" title="To put a refinery for sale check the box, enter a value (in thousands)
+     and push the 'list' button. To delist, uncheck the box.">Put for Sale</a></th></tr>
+
+    </thead>
+
+    <tbody>
+    {% if assets %}
+    {% for a in assets %}
+        <tr ><td>
+            {% if a.refinery.fuel == "gas" or a.refinery.fuel == "diesel" %}
+                <select id="convert_{{ a.id }}" onchange="convert_gas_diesel({{ a.id }})">
+                    <script>
+                {% for f in oil_fuels %}
+                    if('{{ f }}'=="{{a.refinery.fuel }}"){
+                    document.writeln("<option value={{ f }} selected='selected'> {{ f }} </option>");
+                    } else {
+                    document.writeln("<option value='{{ f }}' > {{ f }} </option>");
+
+                    }
+
+                {% endfor %}
+
+                    </script>
+                    </select>
+            {% else %}
+            {{ a.refinery.fuel }}
+            {% endif %}
+            </td>
+            <td>{{ a.refinery.capacity|times4 }}</td>
+            <td>{{ a.cost }} k</td>
+        <td>{{ a.refinery.margin }}</td><td style="width:12em">
+
+         <input type="radio" name="status_n{{ a.id }}" class="status_{{ a.id }}" value="active" onchange="act({{a.id }},'schedule');"
+                 {{ a.status|checked:"active" }}>on
+         <input type="radio" name="status_n{{ a.id }}" class="status_{{ a.id }}" value="inactive" onchange="act({{a.id }},'schedule');"
+                 {{ a.status|checked:"inactive" }}>off
+
+          <input type="radio" name="status_n{{ a.id }}" class="status_{{ a.id }}" value="eliminated" onchange="act({{a.id }},'schedule');"
+                 {{ a.status|checked:"eliminated" }}><a href="#" class="tipsy" title="Eliminate this refinery.">elim.</a>
+
+
+
+
+       </td><td class="warn_expiry"><a class="tipsy" title="Link to refinery purchase screen." href="/fp/build_refinery/">{{ a.activation_turn|life_remaining }}</a>
+                <input id="ref_mod_{{ a.refinery.id }}_{{ a.id }}" class="replace replace_{{ a.replaced }}" type="button" value="Replace">
+            </td>
+        <td><input type="checkbox" name="sell_{{ a.id }}" id="sell_{{ a.id }}" {{ a.for_sale|checked:"True"}} onchange="sell({{ a.id }})">
+            <input  type="text" class="sell_price" style="display:none" id="sell_price_{{ a.id }}" size="4" value="{{ a.sale_price }}">
+            <input type="button" style="display:none" value="list" id="list_{{ a.id }}" onclick="onsale({{a.id}})">
+            </td>
+        </tr>
+
+    {% endfor %}
+    {% else %}
+    <tr><td colspan="100">No Active Assets.</td></tr>
+    {% endif %}
+    </tbody>
+</table>
+<div class="big_spacer"></div>
+
+<h3>Fuel Market Information</h3>
+<table>
+<tr>
+    <td>
+    <img src="{{ charts.gas }}">
+</td>
+
+    <td>
+        <img src="{{ charts.diesel }}">
+    </td>
+
+
+</tr>
+
+<tr>
+    <td>
+    <img src="{{ charts.h2 }}">
+</td>
+
+    <td>
+        <img src="{{ charts.elec }}">
+    </td>
+
+
+</tr>
+
+    <tr>
+        <td colspan=2>
+            <div class="spacer"></div>
+           <img src="{{ capacity_chart }}">
+        </td>
+
+    </tr>
+</table>
+</td>
+<td valign="top" align="right">
+<h3>Summary Data</h3>
+
+<span id="loader">
+                    <img src="/site_media/img/ajax-loader.gif" alt="ajax loader">
+                </span>
+<table id="summary_stats">
+    There are your summary refinery statistics for each fuel type.
+    <thead>
+        <tr><th>Fuel</th><th><a href="#" class="tipsy"
+         title="Total capacity available in the fuel type.">Total Cap.</a></th>
+
+          <th><a href="#" class="tipsy"
+            title="Active capacity. The amount of fuel you will be putting on the market">Active Cap.<a/></th>
+            <th><a href="#" class="tipsy"
+              title="The sum of your operating costs for all of your refineries in the fuel type in thousands."> Op. (k) </a>
+            </th><th><a href="#" class="tipsy" title="The weighted margin on fuel sales of this type.">Margin</th></tr>
+
+    </thead>
+    <tbody >
+    <tr ><td >Gas</td><td ><span id="gas_cap"></span></td>
+        <td >
+        <span  id="active_gas_cap"></span></td>
+        <td><span id="gas_op_cost"></span></td>
+    <td ><span  id="gas_margin"></span></td></tr>
+    </tbody>
+    <tbody>
+    <tr><td>Diesel</td><td><span id="diesel_cap"></span></td>
+        <td><span id="active_diesel_cap"></span></td>
+        <td><span id="diesel_op_cost"></span></td>
+        <td><span id="diesel_margin"></span></td></tr>
+    <tr ><td>H2</td><td><span id="h2_cap"></span> </td><td><span id="active_h2_cap"></span></td>
+        <td><span id="h2_op_cost"></span></td>
+        <td><span id="h2_margin"></span></td></tr>
+    <tr ><td>Elec.</td><td><span id="elec_cap"></span></td><td><span id="active_elec_cap"></span></td>
+        <td><span id="elec_op_cost"></span></td>
+        <td><span id="elec_margin"></span></td></tr>
+    </tbody>
+</table>
+
+<div id="summary_chart"></div>
+</td>
+
+</tr></table>
+ <div class="big_spacer"></div>
+{% include 'global/includes/footer.html' %}
+
+

@@ -1,0 +1,77 @@
+{% include 'global/includes/header.html' %}
+        <head><title>Global Fleet Info</title></head>
+
+<script>
+
+
+
+    $(document).ready(function(){
+
+
+      
+
+        var api = new jGCharts.Api();
+                    //2) options
+        {% autoescape off %}
+        var opt =  {{ drivetrain_quantity }}
+
+        {% endautoescape %}
+        $('<img>').attr('src', api.make(opt)).appendTo("#drivetrain_quantity");
+
+        var api2 = new jGCharts.Api()
+        {%  autoescape off%}
+        var vps = {{ vps  }}
+
+        {%  endautoescape %}
+
+        $('<img>').attr('src', api2.make(vps)).appendTo("#vps");
+
+        {%  autoescape off %}
+         var fuel = {data: {{drivetrain_by_fuel}}, title:"Primary Fuel Distribution", bar_width:30, size:'400x300',type:'bvs', axis_labels:{{years}}, legend:{{ fuel_labels }} }
+        {% endautoescape %}
+
+        $('<img>').attr('src', api.make(fuel)).appendTo("#drivetrain_by_fuel");
+
+
+
+
+
+
+
+
+    })
+</script>
+
+<body>
+<h1> Fleet Information</h1>
+
+<table>
+<tr>
+
+<td>
+
+<div id="drivetrain_quantity"></div>
+    Breakdown by drivetrain of all vehicles on the road in a given year. This shows the
+    year over year transformation of the fleet.<br>
+</td>
+<td>
+<div id="vps"></div>
+</td>
+    </tr>
+
+<tr><td>
+Fleet breakdown by year and primary fuel type.
+<div id="drivetrain_by_fuel" style="width:400px;background-color:red;"></div>
+</td><td>
+<div style="width:400px;height:70px;background-color:lightgreen">
+Detailed vehicle sales data in csv format for spreadsheet analysis.<Br>
+<br><a href="{% url vehicle_sales_data %}" > Click here for download. </a>
+</div>
+</td></tr>
+
+</table>
+{% include 'global/includes/footer.html' %}
+
+
+
+

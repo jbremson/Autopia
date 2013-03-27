@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block usernav %}
+{% include user.nav_file %}
+{% endblock %}
+
+{% block content %}
+
+    <head>
+    <title>Consumer Play Guide</title>
+    </head>
+<h1>Consumer Play Guide</h1>
+
+    {% include "global/includes/help_msg.html" %}
+
+    <h2>Overview</h2>
+
+    The consumer player represents a large group of consumers. He has two goals
+    (in order of importance):
+
+    <ol>
+    <li>Make sure he has enough vehicles.</li>
+    <li>Get the most attractive vehicles possible for his consumers.</li>
+
+    </ol>
+
+  <h2>Player Actions</h2>
+
+    <p>The <a href='/home'>"Home" screen</a> provides information about the player profile
+    and fuel consumption.</p>
+
+    <p>
+    Consumers buy vehicles on the <a href='/new_vehicle_market'>"Global Screens -> Buy Vehicles" page.
+     </a>
+     </p>
+
+  {% include "global/includes/help_guide.html" %}
+
+
+    <h2>Strategy Hints</h2>
+
+    <ul>
+       <li>
+           To maximize your score you need to meet your vehicle quota for the turn. Manage
+           your vehicle purchases according to your budget.
+       </li>
+    <li>
+        Pay attention to the "Rank" column on the vehicle purchase screen (Global Screens ->
+        Buy Vehicle). Low ranks indicate more attractive cars for your consumer, but do not
+        use the ranks as your sole buying criteria.
+    </li>
+
+    <li>Negotiate vehicle prices with the vehicle producers. Make them work for your money.</li>
+    <li>If your consumer profile has a "balance" interest you can earn points by not spending
+    all of your money. </li>
+
+    <li>
+        Fuel costs are deducted from your turn allowance at the beginning of the turn. High fuel
+        costs decrease the level of vehicles you can buy in the turn.
+
+    </li>
+    </ul>
+  {% endblock %}

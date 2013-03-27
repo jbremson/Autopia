@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<style>
+      #messages {
+    display: table;
+    }
+
+      .header{ font-style:italic; font:9pt}
+      .divider {height:5px; color: gray; background-color: gray}
+    .me {color:red}
+
+
+</style>
+
+<script type="text/javascript">
+
+    var MY = {}
+
+    var poll_count=2
+    var i = 1
+
+
+    MY.msg_format=function(uname,to,msg,id){
+
+        str = "<hr class='divider'><div class='header' id='header_' "+ id +">From: " +
+                 uname + " To: " + to +"</div>" +
+                "<hr>" + msg + "<hr class='divider'>"
+        return str
+
+    }
+
+    testing = function(){
+        alert("called")
+    }
+
+    MY.expander = function(){
+
+        //get a message from the server with a username and a message content
+        $(function(){
+              $.get("{% url app.views.chat_read %}",
+                      function(data){
+                          if(data==-1){
+                              alert("failed")
+                          }else{
+                              if (data.count > 0){
+                                  poll_count = poll_count + 10
+                                  str = MY.msg_format(data.uname,data.to,data.message,data.id)
+                                  $("#messages").append(str)
+                                    if (document.body.scrollHeight) {
+                                        window.scrollTo(0, document.body.scrollHeight);
+                                    }
+                                  } else {
+                                    poll_count = poll_count - 1
+                                  if (document.body.scrollHeight) {
+                                      window.scrollTo(0, document.body.scrollHeight);
+                                  }
+                                }
+                          }
+                   },"json")
+              });
+
+
+    }
+
+    var wait_cycles = 0
+    MY.manage_polling = function(){
+        if (wait_cycles > 3){
+            poll_count = 1
+        }
+        var wait = 3000
+        poll_count = Math.min(25,poll_count)
+        if (poll_count > 0){
+            MY.expander()
+            if (poll_count > 0){
+                //prolific messagng in effect.
+                //check more often
+                wait_cycles = 0
+                wait = 1000
+            } else {
+                wait_cycles = wait_cycles + 1
+            }
+            setTimeout("MY.manage_polling()",wait)
+        }
+    }
+
+    $(document).ready(function()
+        {
+
+            MY.manage_polling()
+
+            $('#messages').click(function(){poll_count=poll_count + 5;
+                MY.expander(); MY.manage_polling()});
+
+            $(".header").click(function(){alert("ck")});
+            $(document).ajaxError(function(e, xhr, settings, exception) {
+                     document.write('error in: ' + settings.url + ' \n'+'error:\n' + xhr.responseText );
+
+                 });
+            
+        }
+
+     );
+
+
+</script>
+
+
+</head>
+
+<body>
+<div id="messages">
+
+
+
+
+</div>
+
+
+</body>
+</html>

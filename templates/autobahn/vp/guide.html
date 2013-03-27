@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+<head><title>Vehicle Producer Guide</title></head>
+{% block usernav %}
+{% include user.nav_file %}
+{% endblock %}
+
+
+
+{% block content %}
+
+
+ <head>
+ <title>VP Play Guide</title>
+ </head>
+
+    {% include "global/includes/help_msg.html" %}
+    
+  <h1>Vehicle Producer Play Guide</h1>
+
+    <h2>Overview</h2>
+
+    The goal of the vehicle producer (VP) is to maximize his profit. The VP makes
+    money by selling his vehicles at a profit to consumers. The VP has two basic actions:
+
+    <ul>
+    <li>Creating vehicles to sell on the next game turn.</li>
+    <li>Investing RD points in order to improve the capabilities of the vehicles.</li>
+
+    </ul>
+
+
+    <h2>VP Game Actions
+    </h2>
+
+    <p>
+    Vehicle producers build cars at <a href="/vehicle/new_vehicle">[Private Screens -> Create Vehicle]</a>.
+    Building large runs of vehicles reduces your per unit cost. The minimum cost comes at a run of 250
+    vehicles. Beyond that the cost remains constant.
+    
+        </p>
+    
+    <p>
+    Vehicle producers improve and distinguish their vehicles by R and D (RD). Free RD points are awarded
+    for when you make a profit on your vehicle. Area RD points are applied to your VP for producing and selling
+    vehicles, based on the vehicle type sold. 
+    
+    <ul>
+    <li>
+        For detailed information on RD point awards and how you earn them see
+        <a href="/vp/rd_award">[Private Screens -> R&D Awards]</a>.
+    </li>
+    
+        <li>
+            To invest free points in RD areas of your choosing go to 
+            <a href="/vp/vehicle_r_and_d">[Private Screens -> R & D Investment]</a>
+        </li>
+    
+    </ul>
+
+    </p>
+    <p>
+        Get vehicle market information at <a href="/global/fleet_info/">[Global Screens -> Fleet Info].</a> 
+        More detailed market information is available as a csv file download for spreadsheet analysis in
+        the link in green box at the end of page. The csv can be downloaded <a href="/global/veh_sales_data">
+        here.
+        </a>
+    
+    
+    
+    </p>
+    
+    {% include "global/includes/help_guide.html" %}
+
+
+
+    <h2>Strategy Hints</h2>
+
+    <ul><li>Larger vehicle runs allow you to sell at lower prices.</li>
+    <li>Pay attention to the size of the market. Vehicles you don't sell are sold off at 75% of your build
+    cost. Unsold vehicles can be costly.</li>
+    <li>You can negotiate special prices with consumers by using funds transfers. This allows you to
+    sell a vehicle for less than official market price, without letting all consumers have the same
+    price.</li>
+    </ul>
+{% endblock %}

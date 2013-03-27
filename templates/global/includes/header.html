@@ -1,0 +1,370 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+
+<script type="text/javascript" language="javascript" src="{{ AJAX_LIB }}"></script>
+
+
+<script type="text/javascript" language="javascript" src="/site_media/jquery.dataTables.min.js"></script>
+
+<script type="text/javascript" language="javascript" src="/site_media/jgcharts.pack.js">
+	</script>
+        <script type="text/javascript" language="javascript" src="/site_media/jquery.tablesorter.min.js">
+	</script>
+
+	        <script type="text/javascript" language="javascript" src="/site_media/jquery.dimensions.min.js">
+	</script>
+
+	<script type="text/javascript" language="javascript" src="/site_media/jquery.tablesorter.pager.js">
+	</script>
+          <script type="text/javascript" language="javascript" src="/site_media/tipsy/javascripts/jquery.tipsy.js">
+
+	</script>
+
+              <script type="text/javascript" language="javascript" src="/site_media/jquery.field.min.js"></script>
+
+        <link rel="stylesheet" href="/site_media/css/demo_table.css" />
+        <link rel="stylesheet" href="/site_media/tipsy/stylesheets/tipsy.css" type="text/css" />
+          <link rel="stylesheet" href="/site_media/css.css" type="text/css">
+
+
+        <script type="text/javascript">
+
+        {% ifequal user.group "Vehicle Producer" %}
+
+          change_price = function(s){
+           if (isNaN(s['price'])){
+                   alert("Not a number.");
+                   return false;
+               }
+
+               if (s['price'] < 0){
+                   alert("Negative sales price is illegal")
+                   return false
+               }
+
+           $(function(){
+               $.post("{% url vehicle_price_change %}",s,
+                    function(data){
+                        if(data==-1){
+                            alert("failed")
+
+                        } else {
+                            $("#price_change_" + s['id']).html(s['price'])
+                            $("#new_price").html("")
+
+                        }
+                 },"json")
+           });
+        }
+            $(document).ready(function(){
+               $("#price_changer_button").click(function(){
+
+                   $("#price_changer").hide()
+
+                });
+                $("#shut_price_changer").click(function(){
+                    $("#price_changer").hide(speed="slow")
+
+                });
+
+               $(".price_change").click(function() {
+                    $("#new_price").val("")
+                    var loc=$(this).position()
+                    $("#price_changer").css({'position':'absolute','top':loc.top ,'left':loc.left+90})
+                   $("#price_changer").show(speed="slow")
+                    $("#vid_to_change").val(this.id.split("_")[2])
+
+                });
+
+                 $("#price_changer_button").click(function(){
+                    var s = {}
+                    s['id'] = $("#vid_to_change").val()
+                    s['price'] = $("#new_price").val()
+                    change_price(s)
+                });
+            });
+        {% endifequal %}
+
+
+                 function change_val(str,val){
+
+                // changes element str.text to val
+                $(str).hide()
+                $(str).text(val)
+                $(str).show();
+
+
+         }
+                function send_text(s){
+                $.post("/chat/write/",s, function(data){
+                $("textarea#write_box").val('')
+                    $("#message_window").css('background-color','white')
+                    setTimeout("$('#message_window').css('background-color','darkgreen')",300)
+                    if (data.status=="fail"){
+                         alert("Error: " + data.msg)
+                        }else {
+                        1
+                    }
+                },"json");
+
+        }
+
+                 function warn_color(obj){
+                    var num = Number($(obj).text())
+                    if (num <= 12){
+                        $(obj).css('background-color','#FF4D4D')
+                    } else if (num <= 16){
+                        $(obj).css('background-color','yellow')
+                    } else if (num > 16){
+                        $(obj).css('background-color','white')
+                    }
+                 }
+
+        function d2h(number)
+        // returns hex string of decimal number
+        {
+            if (number < 0)
+            {
+                number = 0xFFFFFFFF + number + 1;
+            }
+
+            return number.toString(16).toUpperCase();
+        }
+
+             function colorfy(obj,num ){
+                 // num is the value that the color will be based on. it must be sent.
+                 var font_style = {18:'italic'}
+                 var font_weight = {0:'normal',12:'bold',23:'bolder'}
+                 var val = 0xFFFFFF -(num  * 0x11111)
+                 if (num  > 8){
+                     val = val - (num * 0x20)
+                 }
+                 var my_col = "#" + d2h(val)
+                 $(obj).css('background-color',my_col)
+                 for (var style in font_style){
+                     if (num >= style){
+                         $(obj).css('font-style',font_style[style])
+                     }
+                 }
+                 for (var weight in font_weight){
+                     if (num >= weight){
+                         $(obj).css('font-weight',font_weight[weight])
+                     }
+                 }
+                 if (num > 27){
+                     $(obj).css({'border-width':1,'border-style':'dotted'})
+
+                 }
+
+                 if (num > 35){
+                     $(obj).css({'border-width':2,'border-style':'solid'})
+                 }
+                 if (num > 40){
+                     $(obj).css({'border-width':3,'border-style':'double'})
+                 }
+             }
+
+            function check_messages(){
+               s = {}
+               s['fxn']="check_messages"
+               $(function(){
+                          $.get("{% url ajax_server %}",s,
+                           function(data){
+                               if (data.status==-1){
+                                   alert(data.msg)
+                               }else{
+                                   if (data.messages > 0){
+                                    $("#message_alert").css('visibility','visible')
+                                    $("#message_count").html(data.messages)
+                                   } else {
+                                       $("#message_alert").css('visibility','hidden')
+                                   }
+                               }
+
+                           },"json");
+
+                        });
+           }
+
+
+    jQuery.fn.dataTableExt.aTypes.unshift(
+        function ( sData )
+        {
+            var sValidChars = "0123456789-.M";
+            var Char;
+            var bDecimal = false;
+
+            /* Check the numeric part */
+            for ( i=0 ; i<sData.length ; i++ )
+            {
+                Char = sData.charAt(i);
+                if (sValidChars.indexOf(Char) == -1)
+                {
+                    return null;
+                }
+
+                /* Only allowed one decimal place... */
+                if ( Char == "," )
+                {
+                    if ( bDecimal )
+                    {
+                        return null;
+                    }
+                    bDecimal = true;
+                }
+            }
+
+            return 'numeric-comma';
+        }
+    );
+
+    jQuery.fn.dataTableExt.oSort['numeric-comma-asc']  = function(a,b) {
+        var x = (a == "-") ? 0 : a.replace( /M/, "" );
+        var y = (b == "-") ? 0 : b.replace( /M/, "" );
+        x = parseFloat( x );
+        y = parseFloat( y );
+        return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+    };
+
+    jQuery.fn.dataTableExt.oSort['numeric-comma-desc'] = function(a,b) {
+        var x = (a == "-") ? 0 : a.replace( /M/, "" );
+        var y = (b == "-") ? 0 : b.replace( /M/, "" );
+        x = parseFloat( x );
+        y = parseFloat( y );
+        return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+    };
+
+          function messager(obj,username, reply){
+               var out = $(obj).position()
+               var x = out.left
+               var y = out.top
+                $("#message_window").css({'position':'absolute','left':x+50,'top':y+30})
+               $("#message_window").css('visibility','visible');
+               $("#write_box").val("\n\n" + "---\n" + reply)
+                //$("#receiver_select").val($(this).text())
+                $("#receiver_select").val(username)
+
+          }
+
+         $(document).ready(function(){
+             check_messages()
+
+             $(".message_reply_link").click(function(){
+                 var username=$(this).html().trim()
+//                 var clone = $(this).clone()
+//                 $(clone).children().remove()
+//                 var reply = $(clone).text() + "\n^^^ said " + username + "^^^\n"
+                 var id = $(this).attr("id").split("_")[1]
+                 var msg_id = "#msg_" + id
+                 var in_reply = $(msg_id).text().split("\n")
+                 var reply = Array()
+                 for(var i=0; i<in_reply.length; i++) {
+                     reply[i]= in_reply[i] +"\n"
+                 }
+
+                 reply = reply.join("")
+                 messager(this,username,reply)
+
+
+             });
+             setInterval("check_messages()",20000)
+            $(".send_message_link").click(function()
+            {
+
+                var username = $(this).text().split(" ").join("");
+                messager(this,username,"")
+
+
+            });
+               $(".warn_expiry").each(function(){
+                    warn_color(this)
+                 });
+
+             $(".colorfy").each(function(){
+                 num = parseInt($(this).text())
+                 colorfy(this,num)
+
+             });
+
+             $(".padder").children().css({'padding-left':'10px','padding-right':'10px'})
+             $("#message_window_closer").click(function(){
+                $("#message_window").css('visibility','hidden');
+                  $("textarea#write_box").val('')
+             });
+
+             $(".closer").click(function(){
+                 $("#message_alert").css('visibility','hidden');
+             });
+
+             $("#check_messages").click(function(){
+                 window.open("/chat",'chat')
+
+             });
+
+
+
+             $("#send_message").click(function()
+                {
+                    var s={}
+                    var str = $("textarea#write_box").val()
+                    s['str'] = str
+                    s['receiver'] = $("select#receiver_select").val()
+                    send_text(s)
+
+               }
+             );
+        // csrf protection for POST over AJAX.
+        $('html').ajaxSend(function(event, xhr, settings) {
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+    });
+
+         });
+
+        </script>
+
+</head>
+<body>
+
+
+    <div id="message_alert" >
+        <div style='float:right' class="closer">[X]&nbsp;&nbsp; </div>
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+        <div>**** New Message(s) (<span id="message_count"></span>)**** </div>
+
+        <div class="spacer"></div>
+
+       <div style="color:white"><a href="/chat_log"> Check here. </a></div>
+
+    </div>
+
+	<img border="0" height="60" width="600" src="/site_media/img/autopia.png" >
+    <div class="spacer" > </div>    <div class="spacer" > </div>
+   {% if user.nav_file %}
+         {% include user.nav_file %}
+    {% endif %}
+
+
+    {% load cache %}
+    {% load auto_extras %}

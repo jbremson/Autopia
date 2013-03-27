@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
+
+<script type="text/javascript">
+
+    var MY = {}
+    MY.send_text = function(s){
+           $.post("/chat/write/",s, function(data){
+                $("textarea#write_box").val('')
+              if (data.status=="fail"){
+                    alert("Error: " + data.msg)
+
+                }else {
+                  1;
+                }
+
+
+                        },"json");
+
+    }
+
+    $(document).ready(function()
+        {
+//            $("#write_box").keypress(function(e)
+//            {
+//                    // if the key pressed is the enter key
+//                    if (e.which == 13)
+//                    {
+//                        var str = $("textarea#write_box").val()
+//                        s = {}
+//                        s['str'] = str
+//
+//                        MY.send_text(s)
+//                        parent.chat_read.MY.expander()
+//                        parent.chat_read.MY.manage_polling()
+//
+//
+//
+//                            // do work
+//                    }
+//            });
+
+
+            $("#send_message").click(function()
+            {
+                var s={}
+                var str = $("textarea#write_box").val()
+                s['str'] = str
+                s['receiver'] = $("select#receiver_select").val()
+                MY.send_text(s)
+                 parent.chat_read.MY.expander()
+                 parent.chat_read.MY.manage_polling()
+
+            }
+                    );
+            $("#check_messages").click(function()
+            {
+                parent.chat_read.MY.expander()
+                parent.chat_read.MY.manage_polling()
+            
+
+
+            });
+            //get that Ajax error!!!! :)
+           $(document).ajaxError(function(e, xhr, settings, exception) {
+              document.write('error in: ' + settings.url + ' \n'+'error:\n' + xhr.responseText );
+
+          });
+
+        }
+
+);
+
+
+</script>
+
+
+</head>
+
+
+<body>
+{{form}}
+<div id="write_container">
+    <select id="receiver_select">
+        {% for u in users %}
+
+        <option name='{{u.username}}' value="{{u}}">{{u.username}}</option>
+        {% endfor %}
+
+    </select>
+    <textarea id="write_box" rows="1" cols="60">
+
+
+    </textarea>
+
+    <input type="button" value="Send Message" id="send_message"/>
+    <input type="button" value="Check Messages" id="check_messages" />
+    <a href="/chat_log" target="chat">Message Log</a>
+
+</div>
+
+</body>
+</html>

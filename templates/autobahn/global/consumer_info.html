@@ -1,0 +1,123 @@
+{% include 'global/includes/header.html' %}
+
+        <head>
+            <title>Player Info</title>
+        </head>
+<h1>Consumer Information</h1>
+
+<script>
+
+    $(document).ready(function()
+        {
+            $("#consumer_info").tablesorter();
+
+
+        }
+    );
+
+</script>
+
+<table id="consumer_info">
+<thead>
+<a name="vpt"></a>
+       <tr><th>Name</th><th><a href="#vpt" class="tipsy" title="Average vehicle purchases per turn"># Veh./Turn</a></th>
+       <th><a href="#vpt" class="tipsy" title="Expected average car price paid per vehicle by this consumer.">Ave. Veh. Cost</a></th>
+        <th>Description</th></tr>
+</thead>
+<tbody>
+{% for con in consumers %}
+         <tr><td><div class="send_message_link">{{ con.username }}</div></td><td>{{ con.turn_target }}</td><td>{{ con.base_car_cost }}</td><td>{{ con.desc }}</td></tr>
+
+{% endfor %}
+
+
+
+</tbody>
+
+</table>
+
+<h1> Fuel Producer Information</h1>
+
+ <table id="fp_info">
+     <thead>
+            <th>Name</th>
+
+     </thead>
+     <tbody>
+            {% for fp in fps %}
+
+                <tr></tr><td><div class="send_message_link">{{fp.username}}</div></td></tr>
+
+                {% endfor %}
+
+
+     </tbody>
+
+
+
+ </table>
+
+<h1> Vehicle Producer Information</h1>
+
+ <table id="vp_info">
+     <thead>
+            <th>Name</th>
+
+     </thead>
+     <tbody>
+            {% for vp in vps %}
+
+                <tr></tr><td><div class="send_message_link">{{vp.username}}</div></td></tr>
+
+            {% endfor %}
+
+
+     </tbody>
+
+
+
+ </table>
+<!--
+
+<table id="trans">
+<thead><tr><th>Year</th><th>Recipient</th><th>Vehicle</th><th>Quantity</th><th>Fees</th></th><th>Amount</th></tr>
+</thead>
+<tbody>
+{% for veh in vehicle_buys  %}
+     <tr><td>{{ veh.year }}</td><td>{{ veh.seller.username }}</td><td>{{ veh.vehicle }}</td><td>{{ veh.quantity }}</td><td>
+     ${{ veh.fees|floatformat:"3" }} M
+     </td><td>${{ veh.amount|floatformat:"3" }} M</td></tr>
+
+
+{% endfor %}
+
+
+</tbody>
+
+
+</table>
+
+
+
+<h1>Income</h1>
+
+<table id="income">
+<thead><tr><th>Year</th><th>From</th><th>Account</th><th>Desc</th><th>Amount</th></tr>
+</thead>
+<tbody>
+{% for tr in transactions  %}
+     <tr><td>{{ tr.year }}</td><td>{{ tr.buyer.username }}</td><td>{{ tr.account }}</td><td>{{ tr.desc }}</td><td>${{ tr.amount|floatformat:"3" }} M</td></tr>
+
+
+{% endfor %}
+
+
+</tbody>
+
+
+</table>
+
+-->
+
+
+{% include 'global/includes/footer.html' %}

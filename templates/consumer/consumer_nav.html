@@ -1,0 +1,24 @@
+<ul id="navmenu-h">
+    <li><a href="/home">{{ user.username|capfirst }} {{ year }}</a></li>
+    <li><a href="#">Private Screens</a>
+        <ul><li><a href="/home">Home</a></li>
+            <li><a href="{% url chat_log %}">Messaging</a></li>
+            <li><a href="/view_fleet">My Fleet</a></li>
+            <li><a href="/consumer/transactions">Transaction Records</a></li>
+            <li><a href="/accounts/change_password/">Change Password</a></li>
+        </ul></li>
+
+   {%  include "global/global_nav.html" %}
+
+</ul>
+<br>
+<br>
+
+<!-- <table class="nav"><tr><td>User Navigation</td>
+        <td><a href="/home">Home</a></td>
+      
+                <TD><A HREF="/view_fleet">My Fleet</a></td>
+                <td><a href="/consumer/transactions">My Expenditures / Income</a></td>
+		<td><a href="/transaction">Create Transaction</a></td></tr></table>
+
+		-->

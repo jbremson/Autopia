@@ -1,0 +1,450 @@
+{% include 'global/includes/header.html' %}
+
+<head><title>Autobahn R&D Screen</title>
+
+<style>
+    .left_td {
+        float:left;
+        width:180px;
+
+    }
+
+</style>
+<script language="javascript">
+
+    $(document).ready(function(){
+
+     var  MY = {}
+
+     MY.opts={
+         min:0,
+         max:20,
+         majorTicks:4,
+         minorTicks:3
+     }
+
+     MY.gs={}
+     MY.opts['label']="R&D Available"
+     MY.gs['points'] = new Gauge(document.getElementById("points_available"),MY.opts)
+     MY.gs['points'].setValue({{ points }})
+
+
+     MY.opts['label']="R&D Expended"
+     MY.opts['value']={{ rd_expended }}
+     MY.opts['max']=120
+     MY.opts['greenFrom']={{ rd_stats.max }}-5
+     MY.opts['greenTo']=120
+     MY.opts['redTo']={{ rd.stats.min }}+5
+     MY.opts['redFrom']=0
+     MY.gs['rd'] = new Gauge(document.getElementById("rd_expended"),MY.opts)
+
+        {%  for g in gauges %}
+        <!-- -->
+        {{ g }}
+
+        <!-- -->
+        {% endfor %}
+
+       $(".button").click(function(){
+           //check to see if there are any points available
+          s = {}
+          s['id']=this.id.split("_")[0]
+          if (s['id']=="road"){
+              s['id']="road_load"
+          }
+          s['fxn']="rd_update"
+          $.post("{%  url ajax_server %}",s,
+            function(data){
+                if(data.status==-1){
+                    alert(data.msg)
+            } else {
+                MY.gs['points'].setValue(data.points_available)
+                MY.gs['rd_'+s['id']].setValue(data.val)
+                MY.gs['rd'].setValue(data.rd_expended)
+
+                if (data.points_available == 0){
+                    $(".button").each(function(){
+                        $(this).css('background-color','gray')
+
+                    })
+
+                }
+             }
+
+
+           },"json")
+
+           //update id with point addition
+
+           //update rd_expended and points_available
+
+       });
+
+    });
+
+
+</script>
+
+</head>
+
+
+<body>
+
+<table class="main_table">
+    <tr>
+
+      <td>
+        <div class="rounded bound_div">
+
+          <table><tr>
+
+
+
+            <td class="left_td"><canvas id="points_available" title="Points available to invest." class="gauge" align="center"></canvas>
+                <div>Points available to invest.</div></td>
+
+              <td class="left_td"> <canvas id="rd_expended" class="gauge" align="center" title="Total points invested."></canvas>
+                  <div>
+                      Total points invested.
+                  </div>
+              </td>
+            <td valign="top"  ><span title="Allocation of R&D investment." style="float:right"><img src="{{ pie }}" ></span><div>
+                Allocations
+            </div></td>
+
+
+
+
+
+            </tr></table>
+        </div>
+    </td></tr>
+
+
+ <tr>
+
+      <td>
+        <div class="rounded bound_div" >
+
+            <div>
+            <span style="float:left; width:200px"><canvas id="rd_gas" title="Conventional gasoline engine technology."class="gauge" align="center"></canvas>
+            <input type="button" id="gas_button" class="button" style="margin-left:46px" value="+1 Gas">
+
+            </span>
+
+            <span style="float:left; width:200px"><canvas id="rd_diesel" class="gauge" align="center" title="Conventional diesel engine technology"></canvas>
+                        <input type="button" id="diesel_button" class="button" style="margin-left:42px" value="+1 Diesel">
+            </span>
+
+            <span style="float:left; width:200px"><canvas id="rd_h2" class="gauge" align="center" title="Hydrogen Fuel Cell technology."></canvas>
+
+                        <input type="button" class="button" id="h2_button" style="margin-left:50px" value="+1 H2">
+            </span>
+
+
+            </div>
+            <div>
+            <span style="float:left; width:200px"><canvas id="rd_bev" class="gauge" title="Battery Electric Vehicle (BEV)"></canvas>
+
+                        <input type="button" class="button" id="bev_button" style="margin-left:38px" value="+1 Electric">
+            </span>
+
+              <span style="float:left; width:200px"><canvas id="rd_hev" title="Hybrid Electric Vehicle (HEV)" class="gauge"></canvas>
+                          <input type="button" class="button" id="hev_button" style="margin-left:40px" value="+1 Hybrid">
+              </span>
+
+              <span style="float:left; width:200px"><canvas id="rd_road_load" title="Road Load - General efficiency (e.g. aerodynamics)" class="gauge"></canvas>
+                          <input type="button" class="button" id="road_load_button" style="margin-left:34px" value="+1 Efficiency">
+              </span>
+
+            </div>
+        </div>
+    </td></tr>
+ </table>
+{# <tr>#}
+{##}
+{#     <div class="bound_div rounded">#}
+{#     <table>#}
+{##}
+{#     <tr>#}
+{#         <td>Gas</span>#}
+{##}
+{#         <td>Diesel</td>#}
+{##}
+{#         <td>Electric</td>#}
+{##}
+{##}
+{##}
+{##}
+{#     </tr>#}
+{##}
+{#     <tr>#}
+{#         <td>Hydrogen</td>#}
+{##}
+{#         <td>Hybrid</td>#}
+{##}
+{#         <td>Efficiency</td>#}
+{##}
+{##}
+{#     </tr>#}
+{##}
+{##}
+{#     </table>#}
+{##}
+{#     </div>#}
+{# </tr>#}
+{##}
+{##}
+{#</table>#}
+
+</body>
+</html>
+{#        <head><title>R & D Invest</title></head>#}
+{##}
+{##}
+{#<script>#}
+{##}
+{#    var MY = {};#}
+{#    MY.max_points = {{points}};#}
+{#    MY.limit = 20;#}
+{##}
+{#    function get_points(){#}
+{#           return  parseInt($("#points").text())#}
+{##}
+{#    }#}
+{##}
+{#    function get_id(str){#}
+{#        return parseInt($(str).text())#}
+{##}
+{#    }#}
+{##}
+{#    function set_id(str,val){#}
+{#        $(str).text(val)#}
+{#    }#}
+{##}
+{#    function set_field(str,val){#}
+{#        $(str).val(val)#}
+{#       #}
+{#    }#}
+{#    #}
+{#    function set_points(val){#}
+{#        $("#points").text(val)#}
+{#        $("#points_field").val(val)#}
+{##}
+{#    }#}
+{##}
+{#    function increase(val,coef){#}
+{##}
+{#        var mult = coef || 1#}
+{##}
+{#        p = get_points()#}
+{##}
+{#        if (p==0){#}
+{#            alert("You have no more points to spend this turn.")#}
+{#        }#}
+{#        if (p == 0 && mult == 1){#}
+{#           return;#}
+{#        }#}
+{##}
+{#  #}
+{##}
+{#        // Now increment the current allocation up by 1.#}
+{#        str = "#area"+val#}
+{#        cur_val = get_id(str)#}
+{#        if (cur_val >= MY.limit && mult == 1){#}
+{#            alert("Max expenditure reached.");#}
+{#            return;#}
+{#        }#}
+{#    #}
+{#        cur_val = cur_val + mult#}
+{#        if (cur_val < 0){#}
+{#            return;#}
+{#        }#}
+{##}
+{#        if (cur_val > MY.max_points){#}
+{#            return;#}
+{#        }#}
+{##}
+{#             // decrease the point count by 1#}
+{#        p = p - mult;#}
+{#        set_points(p);#}
+{#        set_id(str,cur_val)#}
+{#        str = "#field"+val#}
+{#        set_field(str,cur_val)#}
+{##}
+{##}
+{##}
+{#        //now decrease the points id by 1#}
+{#    }#}
+{##}
+{#    function decrease(val){#}
+{#        p = get_points()#}
+{#        if (p == 0){#}
+{#            alert("You have no more points to spend on this turn.")#}
+{#        }#}
+{#        if (p == MY.max_points ){#}
+{#            return;#}
+{#        }#}
+{#        increase(val,-1);#}
+{#    }#}
+{##}
+{##}
+{# $(document).ready(function()#}
+{# {#}
+{#        $(".silver_box").css("width",150);#}
+{#//   $("#rd_table").tablesorter({#}
+{#//       headers:{#}
+{#//       1:{sorter:false },#}
+{#//       3:{sorter:false},#}
+{#//       5:{sorter:false}#}
+{#//    }#}
+{#//#}
+{#//   }#}
+{#//);#}
+{#    }#}
+{#   )#}
+{#</script>#}
+{##}
+{#<script>#}
+{##}
+{##}
+{##}
+{#    $(document).ready(function(){#}
+{##}
+{##}
+{##}
+{##}
+{#        var api = new jGCharts.Api();#}
+{#                    //2) options#}
+{#        {% autoescape off %}#}
+{#        var opt = {data: {{ rd_history }}, size:"800x200", bar_spacing: 50, type: 'bvs', axis_labels:{{ rd_labels }},#}
+{#            bar_width:15, title: "{{ user.username }} R and D Profile"};//set options#}
+{##}
+{##}
+{#        {% endautoescape %}#}
+{#        //3) append img#}
+{##}
+{##}
+{#         $('<img>').attr('src', api.make(opt)).appendTo("#rd_history");#}
+{##}
+{##}
+{##}
+{##}
+{#    })#}
+{#</script>#}
+{##}
+{##}
+{#{% include "vp/includes/base_info.html" %}#}
+{##}
+{#<div id="rd_history"></div>#}
+{#<h2>Based on your sales and revenues you have earned R&D resources.. Allocate them for the next turn here.#}
+{#    <p>#}
+{##}
+{##}
+{##}
+{#    <div id="pointsbox" class="silver_box">#}
+{#Points available:  <div id="points">{{points}}</div>  </h2>#}
+{#    </div>#}
+{#<form id="rd_form" method="POST">#}
+{#    {% csrf_token %}#}
+{#    <input id="points_field" type="hidden" name="points">#}
+{#<table id="rd_table" class="ledger" >#}
+{#    <thead>#}
+{#        <tr><th>Area</th><th>Modify</th><th>Type</th><th>Current Allocation</th><th>Total Allocation</th><th>Description</th></tr>#}
+{#    </thead>#}
+{#    <tbody>#}
+{##}
+{#<tr class="odd"><td>Style</td><td>  <input type="button" value="+"  onClick="increase('style')">#}
+{##}
+{#        <input type="button" value="-" onClick="decrease('style')">#}
+{#            </td><td>Preference</td><td>#}
+{#        <div id="areastyle" >0</div></td>#}
+{#    <input type="hidden" value=0 name="style" id="fieldstyle" >#}
+{#    <td id="teststyle">{{areas.style}}</td><td>Decreases the cost of adding style to a vehicle.</td></tr>#}
+{##}
+{##}
+{##}
+{#<tr><td>H2</td><td>  <input type="button" value="+"  onClick="increase('h2')">#}
+{##}
+{#        <input type="button" value="-" onClick="decrease('h2')">#}
+{#            </td><td>Drivetrain</td><td>#}
+{#        <div id="areah2" >0</div></td>#}
+{#    <input type="hidden" value=0 name="h2" id="fieldh2" >#}
+{#    <td>{{areas.h2}}</td><td>Improves fuel cell technology. Increases mpg. </td></tr>#}
+{##}
+{##}
+{##}
+{#<tr class="odd"><td>Gas</td><td>  <input type="button" value="+"  onClick="increase('gas')">#}
+{##}
+{#        <input type="button" value="-" onClick="decrease('gas')">#}
+{#    </td><td>Drivetrain</td><td>#}
+{#        <div id="areagas" >0</div></td>#}
+{#    <input type="hidden" value=0 name="gas" id="fieldgas" >#}
+{#    <td>{{areas.gas}}</td><td>Improves gasoline engine technology. Increases mpg.</td></tr>#}
+{##}
+{##}
+{##}
+{#<tr><td>Diesel</td><td>  <input type="button" value="+"  onClick="increase('diesel')">#}
+{##}
+{#        <input type="button" value="-" onClick="decrease('diesel')">#}
+{#    </td><td>Drivetrain</td><td>#}
+{#        <div id="areadiesel" >0</div></td>#}
+{#    <input type="hidden" value=0 name="diesel" id="fielddiesel" >#}
+{#    <td>{{areas.diesel}}</td><td>Improves diesel engine technology. Increases mpg.</td></tr>#}
+{##}
+{##}
+{##}
+{#<tr class="odd"><td>Road Load</td><td>  <input type="button" value="+"  onClick="increase('road_load')">#}
+{##}
+{#        <input type="button" value="-" onClick="decrease('road_load')">#}
+{#            </td><td>Efficiency</td><td>#}
+{#        <div id="arearoad_load" >0</div></td>#}
+{#    <input type="hidden" value=0 name="road_load" id="fieldroad_load" >#}
+{#    <td>{{areas.road_load}}</td><td>Improves non-drivetrain vehicle efficiency. This includes aerodynamics and auxiliaries (e.g. air conditioning). Increases mpg for all vehicles.</td></tr>#}
+{##}
+{##}
+{##}
+{#<tr><td>Performance</td><td>  <input type="button" value="+"  onClick="increase('performance')">#}
+{##}
+{#        <input type="button" value="-" onClick="decrease('performance')">#}
+{#    </td><td>Preference</td><td>#}
+{#        <div id="areaperformance" >0</div></td>#}
+{#    <input type="hidden" value=0 name="performance" id="fieldperformance" >#}
+{#    <td>{{areas.performance}}</td><td>Decreases the cost of adding performance to a vehicle </td></tr>#}
+{##}
+{##}
+{##}
+{#<tr class="odd"><td>Electric </td><td>  <input type="button" value="+"  onClick="increase('bev')">#}
+{##}
+{#        <input type="button" value="-" onClick="decrease('bev')">#}
+{#            </td><td>Drivetrain</td><td>#}
+{#        <div id="areabev" >0</div></td>#}
+{#    <input type="hidden" value=0 name="bev" id="fieldbev" >#}
+{#    <td>{{areas.bev}}</td><td>Improves the mpg of vehicles with electric drivetrain components. This includes HEVs, PHEVs, H2 Fuel Cells and Battery Electric Vehicles(BEVs).</td></tr>#}
+{##}
+{##}
+{##}
+{#<tr><td>Hybrid </td><td>  <input type="button" value="+"  onClick="increase('hev')">#}
+{##}
+{#        <input type="button" value="-" onClick="decrease('hev')">#}
+{#            </td><td>Efficiency</td><td>#}
+{#        <div id="areahev" >0</div></td>#}
+{#    <input type="hidden" value=0 name="hev" id="fieldhev" >#}
+{#    <td>{{areas.hev}}</td><td>Improves the mpg of all vehicles with hybrid drivetrains (HEV, PHEV). Also provides some#}
+{#    improvement to electric drive vehicles (Hydrogen Fuel Cells and Battery Electrics).</td></tr>#}
+{##}
+{##}
+{##}
+{#</tbody>#}
+{#</table>#}
+{##}
+{##}
+{#    <input type="hidden" name="turn" value="{{turn}}">#}
+{# #}
+{#    <table class="std" id="rd_submit"><tr><td colspan="6" align="center"><input type="submit" value="Submit" style="height: 40px; width: 150px;"></td></tr>#}
+{#</table>#}
+{#</form>#}
+{##}
+{#   #}
+{#</body>#}
+{#</html>#}

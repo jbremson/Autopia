@@ -1,0 +1,142 @@
+{% include 'global/includes/header.html' %}
+{% load auto_extras %}
+
+<head>
+
+    <title> Messages</title>
+</head>
+
+<script type="text/javascript">
+
+    function hide_message(id){
+        s={}
+        s['arg']=id
+        s['fxn']="hide_message"
+
+         $(function(){
+            $.post("{% url ajax_server %}",s,
+             function(data){
+             if (data.status==-1){
+                alert(data.msg)
+             } else {
+                 1
+             }
+
+
+
+             })
+
+        });
+
+
+    }
+
+
+     $(document).ready(function()
+        {
+            $("#messages").dataTable()
+            //$("#messages").tablesorter({widthFixed: true}).tablesorterPager({container: $("#pager"),positionFixed:false});
+            $(".msg_hider").click(function(){
+                id = this.id.split("_")[1]
+                $("#tr_"+id).hide()
+                hide_message(id)
+
+
+
+            })
+        });
+</script>
+
+
+<h1>Messages</h1>
+
+      {% if messages %}
+        <table id="messages" width=600px >
+            <thead>
+            <tr><th>Year</th><th>Id</th><th>Message - click on text to reply</th><th>Delete</th></tr>
+
+            </thead>
+
+
+            <tbody>
+            {% for msg in messages %}
+
+           <tr id="tr_{{ msg.id }}">
+
+               <td>{{ msg.message.turn|to_year }}</td>
+           <td>{{ msg.id }}</td>
+
+           <td>
+               <div class="message_background"><span class="bold">From: </span>
+                   <span class="send_message_link">{{ msg.message.sender.username }}</span>
+                   <span class="bold">To: </span><span id="reply_{{ msg.id}}" class="message_reply_link">{{ msg.receiver.username }}</span>
+                   </div>
+
+               <br>
+               <div><div id="msg_{{ msg.id}}">{{msg.message.text|escape|linebreaks}}</div></div><br>
+           </td>
+           <td><input type="button" id="hide_{{ msg.id }}" class="msg_hider" value="[X]"></td>
+           </tr>
+
+            {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+       {% else %}
+
+           -None-
+
+       {% endif %}
+
+        <h2>Send Message</h2>
+
+        {% for u in users %}
+            <div class="send_message_link">{{u.username}}  </div>
+        {% endfor %} 
+
+
+
+        <div class="big_spacer"></div>
+{% include 'global/includes/footer.html' %}
+<!--
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<style>
+      #messages {
+    display: table;
+    }
+
+      .header{ font-style:italic; font:9pt}
+      .divider {height:5px; color: gray; background-color: gray}
+      .user {font-weight:bold}
+    .me {color:red}
+
+
+</style>
+    <title>Message Log</title>
+</head>
+
+<body>
+{% load auto_extras %}
+{% for m in messages %}
+{{m.message.time|date:"r"}}<br> From: <span class="user">{{m.message.sender.username}}</span> To:
+
+<span class="user">{{m.receiver.username}}</span> ({{m.message.turn|to_year}})<br><br> {{ m.message.text }}
+<hr class="divider">
+
+
+{% endfor %}
+
+
+
+</body>
+</html>
+-->

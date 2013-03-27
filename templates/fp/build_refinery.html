@@ -1,0 +1,48 @@
+{% include 'global/includes/header.html' %}
+        <head><title>Build Refinery</title></head>
+{% include 'fp/includes/user_info.html' %}
+<h1>Build Refinery</h1>
+<ul>
+    <li>Refineries last for {{ refinery_life_years}} years ({{refinery_life}} turns).</li>
+
+</ul>
+
+<script>
+
+    $(document).ready(function()
+        {
+            $("#refs").dataTable();
+
+
+
+        }
+    );
+
+</script>
+{% load auto_extras %}
+<table id="refs">
+<thead><tr><th>Fuel</th><th>Size</th><th>Capacity ('000s GGE)</th>
+    <th>Cost ('000s)</th>
+    <th><a href="#" class="tipsy" title="Operating cost for active refinery per turn.">Act. Op.('000s)</a></th>
+    <th><a href="#" class="tipsy" title="Operating cost for INACTIVE refinery per turn.">Inact. Op. ('000s)</a></th>
+
+    <th>Build Time</th></th><th class="tipsy" title="Number of turns (including build time) until payback is achieved. Assumes constant fuel price and full utilization.">Payback Turns</th><th>Margin</th><th>Build</th></tr>
+</thead>
+<tbody>
+{% for ref in refineries  %}
+     <tr><td>{{ ref.fuel }}</td><td><span style="display: none;">{{ ref.size }}</span>{{ ref.name }}</td>
+         <td>{{ ref.capacity }} </td><td>{{ ref.cost}} </td>
+         <td>{{ref.active_cost|floatformat:"0"}} </td><td>{{ref.inactive_cost|floatformat:"0"}} </td>
+         <td>
+     {{ ref.build_time}} yrs. ({{ ref.avail }})</td><td>{{ref.payback}}</td><td>{{ ref.margin }}</td><td><form action="." method="POST">{% csrf_token %}
+             <input type="hidden" name="ref_id" value="{{ ref.id }}"><input type="submit" value="Build {{ ref.name|capfirst}} {{ref.fuel|capfirst}} Ref."> </form>
+     </form> </td></tr>
+
+
+{% endfor %}
+
+
+</tbody>
+
+
+</table>

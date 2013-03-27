@@ -1,0 +1,186 @@
+{% include 'global/includes/header.html' %}
+        <head><title>Transactions</title></head>
+
+{% load auto_extras %}
+{# Autobahn Version #}
+
+<script>
+    $(document).ready(function()
+
+        {
+            $("#mytable").dataTable()
+            $("#other").dataTable()
+            $("#ledger_display").dataTable({"aaSorting":[[0,"desc"]]})
+            $("#vehicle_sales").dataTable({ "aaSorting": [[ 0, "desc" ]]})
+            $("#profit_tip").tooltip()
+            $("#perf_tip").tooltip()
+
+        }
+    );
+ </script>
+
+{#    {% include "vp/includes/base_info.html" %}#}
+<style>
+    table > table  > td{text-align: left}
+
+</style>
+<table class="main_table">
+    <tr>
+        <td>
+            <div class="bound_div rounded">
+                <div class="med_type"> Ledger </div>
+        {% if ledger %}
+        <table id="ledger_display" class="ledger" style="padding-bottom:0px">
+            <thead>
+                <tr style="text-align:left"><th>Year</th><th>Description</th><th>Vehicle</th><th>Copy</th><th>Amount(M)</th></tr>
+        `    </thead>
+            <tbody>
+            {% for row in ledger %}
+            <tr><td>{{row.year|floatformat:"0"}}</td><td>{{ row.desc }}</td><td style="display:table-cell;vertical-align: top">{{ row.vehicle|default_if_none:"" }}
+            </td>
+            <td style="align:center">
+                {% if row.id %}
+                    <form action="/vehicle/new_vehicle/{{row.id|floatformat:"0"}}/" method="GET">
+                    <INPUT TYPE="submit" class="button" value="Copy">
+                    </form>
+                {% endif %}
+            </td>
+
+              <td>{{ row.amount|floatformat:"1" }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+       {% else %}
+            <p>No ledger data.</p>
+       {% endif %}
+
+
+
+            </div>
+
+        </td>
+
+    </tr>
+
+<tr>
+    <td>
+     <a anchor="vehicle_sales"></a>
+       <div class="bound_div">
+           <div class="med_type">My Vehicle Sales</div>
+           <table id="vehicle_sales" class="ledger">
+               <thead>
+               <tr style="text-align:left"><th>Year</th><th>Vehicle</th><th>
+                   MPG
+               </a></th><th>Style</th>
+                   <th id="perf_tip" title="Performance">Perf.</th>
+                   <th>Sold</th><th>Unsold</th><th>Price</th>
+                   <th id="profit_tip" title="Net profit on vehicle.">Profit</th>
+                   <th>Copy</th>
+               </tr>
+
+
+               </thead>
+               <tbody>
+               {% for v in vehicle_sales %}
+                   <tr><td>{{ v.turn|to_year }}</td><td>{{ v.vehicle.name }}</td>
+                   <td>{{ v.vehicle.mpg }} </td>
+                   <td >{{ v.vehicle.style }}</td>
+                   <td >{{ v.vehicle.performance }}</td>
+                   <td>{{v.sold}}</td>
+                   <td>{{v.unsold}}</td>
+                   <td>{{ v.vehicle.price }}</td>
+                   <td> {{v.profit|floatformat:"1"}} M</td>
+                   <form action="/vehicle/new_vehicle/{{v.vehicle.id}}/" method="GET">
+                       <td> <INPUT TYPE="submit" class="button" value="Copy">
+                       </td>
+                   </form>
+
+               {% endfor %}
+               
+               </tbody>
+
+           </table>
+
+       </div>
+
+
+
+    </td>
+
+</tr>
+
+</table>
+
+{# <h3>Vehicle Transaction Records (Current Turn)</h3>#}
+{#{% if vehicle_sales %}#}
+{##}
+{##}
+{##}
+{#    <table id="mytable">#}
+{#    <thead>#}
+{#    <tr><th>Buyer</th><th>Vehicle</th><th>Year</th><th>Quantity</th><th>Type</th><th>Amount</th>#}
+{#    <td>Copy</td>#}
+{#    </tr>#}
+{#    </thead>#}
+{#    <tbody>#}
+{#    {% for v in vehicle_sales %}#}
+{#    <tr>#}
+{#        <td>{{v.buyer.username}}</td>#}
+{#        <td>{{v.vehicle}}</td>#}
+{#        <td>{{v.year}}</td>#}
+{#        <td>{{v.quantity}}</td>#}
+{#        <td>{{v.account }}</td>#}
+{#        <td> {{v.amount|floatformat:"3"}} M</td>#}
+{#          <form action="/vehicle/new_vehicle/{{v.vehicle.id}}/" method="GET">#}
+{#                 <td> <INPUT TYPE="submit" value="Copy {{v.vehicle.name}} for next turn."#}
+{#                 </td>#}
+{#          </form>#}
+{##}
+{##}
+{#    </tr>#}
+{##}
+{#    {% endfor %}#}
+{#    </tbody>#}
+{#</table>#}
+{##}
+{#{% else %}#}
+{#    -None-#}
+{##}
+{#{% endif %}#}
+{##}
+{##}
+{##}
+{##}
+{##}
+{#<h3>Other Transactions</h3>#}
+{#<table id="other">#}
+{#    <thead>#}
+{#    <tr><th>Year</th><th>Payer</th><th>Payee</th><th>Description</th><th>Comment</th><th>Amount</th></tr>#}
+{#</thead>#}
+{#    <tbody>#}
+{#    {% for v in vehicle_penalties %}#}
+{##}
+{#    {% ifequal username v.buyer.username %}#}
+{##}
+{#       <tr class="red_tr">#}
+{#    {% else %}#}
+{##}
+{#    <tr>#}
+{#    {% endifequal %}#}
+{#        <td>{{v.year}}</td>#}
+{#        <td>{{v.buyer }}</td>#}
+{#        <td>{{ v.seller }}</td>#}
+{#        <td>{{v.desc}}</td>#}
+{#        <td>{{v.comment }}</td>#}
+{#        <td>{{v.amount|floatformat:"3"}}M</td>#}
+{##}
+{##}
+{#    </tr>#}
+{##}
+{#    {% endfor %}#}
+{#    </tbody>#}
+{#</table>#}
+
+
+
+{% include 'global/includes/footer.html' %}

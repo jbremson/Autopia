@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block usernav %}
+{% include user.nav_file %}
+{% endblock %}
+
+{% block content %}
+<h1> Game Guide</h1>
+
+<h2>Objective</h2>
+<p>
+Autopia simulates a long term alternative fuel/vehicle transition. Players take the roles of
+consumers and vehicle producers. Each must evolve their behaviors as new regulatory and economic
+factors play out.
+
+
+</p>
+
+<h2>General FAQ</h2>
+
+ <p class="Q">
+    <b>How do I sort tables on multiple columns?</b>
+
+ </p>
+
+<p>
+To sort tables on multiple selected columns hold down the -shift- key while clicking
+on the table headings.
+
+</p>
+<h2>Consumer</h2>
+<p>
+The consumer player represents a market segment of drivers. Consumer segments have varying
+economic attributes and vehicle preferences. The first goal of the consumer is to make sure
+he has met his quota of vehicles. The second goal is to meet the preference requirements of the
+segment. These preferences are style, performance, mpg, and balance (i.e. bank balance).
+</p>
+<p>
+The winning consumer player will make sure he meets his vehicle quota with the most attractive
+vehicles possible. The consumer negotiates with vehicle producers on prices and in order to improve
+the attractiveness of the vehicle selection.
+
+</p>
+
+<h3>Consumer FAQ</h3>
+
+<p class="Q">
+<b>Q: How do I buy vehicles?</b>
+</p>
+<p>
+A:Vehicles are purchased using the "Buy Vehicles" screen. It is on the menu under "Global Screens."
+The funds for vehicle purchase come from an allowance given at the beggining of the turn.
+</p>
+
+<p class="Q">Q: Can I negotiate vehicle prices with the vehicle producers?</p>
+
+<p>A: Yes. Vehicle producers can change their prices.  </p>
+
+
+<p class="Q">Q: How do I know which vehicles are the most attractive?</p>
+<p>A: The "score" column on the "Buy Vehicles" screen provides a measure of the relative
+attractiveness of a vehicle in terms of the existing models for sale. These scores can
+and will change during the turn based on various factors. For example, if the consumer
+overspends on his initial purchase (i.e. buys a vehicle outside of his typical price
+range) the score variable will increase for lower priced vehicles because meeting
+the consumer's quota maximizes his score. </p>
+<p class="Q">
+
+Q: How do I buy fuel?
+</p>
+
+<p>
+A: Fuel is purchased automatically at the beginning of the turn. The cost of the fuel is deducted
+from the vehicle purchasing allowance.
+</p>        
+
+
+<p class="Q">
+Q: Where can I see my current fleet?
+</p>
+
+<p>
+A: See Private Screens -> My Fleet.
+</p>
+
+
+<p class="Q">
+Q: Why do I lose vehicles from my fleet each turn?
+</p>
+
+<p>
+A: This represents normal fleet attrition.
+</p>
+
+
+<p class="Q">
+Q: How do I win?
+
+</p>
+
+<p>
+A: The consumer who scores the most points is the winner of the consumer section of the game.
+
+</p>
+
+
+<p class="Q">
+Q: Who is the v_init vehicle producer seen on the  'My Fleet' page ?
+
+</p>
+
+<p>
+A: The v_init producer is used to set up the game scenario. It represents the consumer's
+existing fleet as the game begins.
+
+</p>
+<h3>Vehicle Producer</h3>
+<p>
+The vehicle producer represents a car company. His goal is to maximize his margin, market share
+and overall revenue by building and selling attractive vehicles, while meeting fuel economy
+regulations. The vehicle producer meets with consumers to negotiate vehicle sales and to find out
+what they want in the next generation of vehicles.
+
+</p>
+
+<p>
+The vehicle producer must 1) create vehicles  (using the Private Screen -> Create Vehicles link or by
+copying an existing vehicle on his Home screen) and 2) allocate R and D resources to shape his future
+vehicle attributes.
+</p>
+
+<h3> Vehicle Producer FAQ</h3>
+<p class="Q">
+Q: How do I know what the consumers want?
+</p>
+<p>
+A: You must talk to the consumers. They know which vehicles are most attractive to them. Also,
+see the Consumer Info screen (at Global Screens -> Consumer Info) to learn about the consumer market segments.
+<div style="font-style:italic;">Hint: The average price points are important information for designing attractive vehicles.</div>
+
+</p>
+
+<p class="Q">
+Q: How do I  build vehicles?
+
+</p>
+<p>
+A: You build vehicles using the Private Screen -> Build Vehicles link.
+</p>
+
+<p class="Q">
+Q: What does it mean to copy a vehicle? How do I do it?
+</p>
+
+<p>
+A: Copying a vehicle allows you to take an existing vehicle from the current turn and use it
+as a base for a vehicle produced on the next turn. It is a a convenience. Copy is a button on
+shown on the existing vehicles table in the Home screen.
+</p>
+
+<p class="Q">
+ Q: How do I change the price of a vehicle?
+ </p>
+
+ <p>
+ A: On the Home screen, click the link value for the vehicle price. The price change will take place
+ immediately.
+ </p>
+
+ <p class="Q">
+ Q: How do I allocate R&D resources?
+ </p>
+
+ <p>
+ A: Use the Private Screens -> R&D Investment
+ </p>
+
+
+<p class="Q">
+Q: What happens if I don't sell all of the vehicles I build.
+</p>
+
+<p>
+A: Remaining vehicles are sold off at 75% of your cost. Thus it is important to guage your
+market demand for a vehicle and make sure it gets sold, even if it requires a substantial discount.
+</p>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+<head><title>Fuel Producer Guide</title></head>
+{% block usernav %}
+{% include user.nav_file %}
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Fuel Producer Player Guide</h1>
+
+        {% include "global/includes/help_msg.html" %}
+
+<h2>Overview</h2>
+<p>
+The goal of the fuel producer is to maximize his profit over the course of the game.
+The fuel producer maximizes his profit by correctly predicting the movement of fuel
+demand over time.
+
+
+</p>
+ <p>
+ The fuel producer has several primary game activities.
+
+ <ul>
+ <li>Manages refineries. Builds new refineries to account for refinery retirement.
+     Activating, deactivating or eliminating them.</li>
+ <li>Buy and sell refineries amongst each other.</li>
+ <li>Build new refineries.</li>
+
+ </ul>
+ </p>
+<h2>Strategies</h2>
+
+   <ul>
+       <li>If vehicle mpg increases the demand for fuel will fall. </li>
+       <li>Profit is maximized when fuel demand and supply are matched. Withholding productions and/or
+       over-producing will reduce your profits. </li>
+       <li>Pay attention to your refinerys' remaining life statistic. Replace them in a timely and appropriate manner.</li>
+       <li>Deactivate surplus refineries to reduce operating costs and control supply.</li>
+       <li>Large refineries have better margins than small ones.</li>
+       <li>Refineries take time to build. The larger the refinery the longer the build time.</li>
+   </ul>
+
+
+    {% include "global/includes/help_guide.html" %}
+{% endblock %}
+
+
+

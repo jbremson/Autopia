@@ -1,0 +1,30 @@
+<ul id="navmenu-h">
+    <li><a href="/home">{{ user.username|capfirst }} {{ year }}</a></li>
+    <li><a href="#">Private Screens</a>
+        <ul><li><a href="/home" >Home</a></li>
+            <li ><a href="/vehicle/new_vehicle">Build Vehicle</a></li>
+            <li><a href="/vehicle_sales">Records</a></li>
+            <li><a href="/vp/vehicle_r_and_d">R & D Investment</a></li>
+            <!-- <li><a href="{% url app.views.rd_award %}">R & D Awards</a></li> -->
+        </ul></li>
+
+       <li><a href="#">Global Screens</a>
+        <ul>
+            <li><a href="/new_vehicle_market">Vehicle Market</a></li>
+            <li><a href="/global/fuel_station">Game Data</a></li>
+            <li><a href="/global/fleet_info">Fleet Info</a></li>
+        </ul>
+
+        <li><a href="#">Help</a>
+       <ul>
+            <li><a href="/guide/vp">Play Guide</a></li>
+            <li><a href="/global/glossary">Glossary</a></li>
+        </ul>
+        </li>
+
+    <li><a href="/accounts/logout">Logout</a></li>
+
+
+
+</ul>
+

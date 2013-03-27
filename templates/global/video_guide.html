@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+        <head><title>Help Videos</title></head>
+
+{% block usernav %}
+{% include user.nav_file %}
+{% endblock %}
+
+{% block content %}
+
+<h1>Video Guide</h1>
+
+    {% for key,val in vids.items %}
+        <h2>{{ key|capfirst }}</h2>
+            {% for link in val %}
+               <a href="/site_media/video/{{ link.dir }}/index.html" target="_blank">{{ link.text }}</a><br>
+            {% endfor %}
+    {% endfor %}
+
+
+
+
+{% endblock %}

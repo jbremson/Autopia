@@ -1,0 +1,168 @@
+{% include 'global/includes/header.html' %}
+
+
+
+#################### OLD TEMPLATE - SAVED FOR RECORDS ONLY ######################################
+<script>
+
+
+
+    $(document).ready(function()
+        {
+
+            var api = new jGCharts.Api();
+            //2) options
+            {% autoescape off %}
+
+             $("#scoreme").dataTable();
+
+            var player_profile={ data: {{ profile_data }}, size:'400x200',type: 'p', axis_labels:{{ profile_labels }}, legend:[] };
+
+            var opt = {data: {{ fuel_history }}, size:'300x200', type: 'bvs', axis_labels:{{ history_labels }},
+                bar_width:30, legend:{{ history_legend }}};//set options
+            var cost = {data: {{ fuel_cost }}, size:'300x200', type: 'bvs', axis_labels:{{ history_labels }},
+                  bar_width:30, legend:{{ history_legend }}};//set options
+
+
+
+            {% endautoescape %}
+            //3) append img
+            $('<img>').attr('src', api.make(opt)).appendTo("#fuel_history");
+
+             $('<img>').attr('src', api.make(cost)).appendTo("#fuel_cost");
+
+             $('<img>').attr('src', api.make(player_profile)).appendTo("#player_profile"); 
+
+             $(".helper").tipsy();
+        }
+    )
+
+        
+ 
+</script>
+
+{%  load auto_extras %}
+
+<div class="silver_box">
+<h3>
+Player Description: {{ user.desc }} <br>
+    <hr>
+<a href="#" class="tipsy" title="Player's average vehicle should cost about this much.">Target Average Vehicle Price:</a> {{ user.base_car_cost }}
+<hr>
+
+Vehicle purchase quota (remaining to buy this turn): {{ user.turn_vehicle_goal }}  <br>
+<hr>
+
+Game Score: {{ user.sum_score }} <br>
+<hr>
+
+
+<a href="{% url 'view_fleet' %}">Total fleet size: {{ user.fleet_size }}</a><br>
+<hr>
+Consumer Profile<br>
+</h3>
+<table border=0>
+
+<tr><td width="600px">The consumer has four attributes used to determine his score. These remain constant throughout the game.
+<ul><li>Style - Importance of style.
+
+</li>
+<li>Performance - Importance of performance.</li>
+
+<li>MPG - Importance of <i>high</i> MPG to the consumer.</li>
+
+<li>Balance - Importance of <i>high</i> bank balance to the consumer. High values indicate more frugal consumers. <i>Meet your vehicle quota
+first to maximize score!</i></li>
+</ul>
+</td>
+
+<td>
+
+
+<div id="player_profile"></div>
+</td>
+
+</table>
+<h3>
+</h3>
+
+
+<!-- ========== Consumer Scoring System =======   -->
+
+
+
+
+<div class="silver_box">
+<h3>Vehicle Stats:</h3>
+    <table>
+        <thead>
+        <tr><th>Fuel</th><th>Count</th><th>MPG (age weighted)</th><th>VMT</th>
+            <th><a href="#" class="tipsy" title="Gallons of gas equivalent required.">Gal.</a></th>
+            <th> <a href="#" class="tipsy" title="Estimated cost of fuel based on last price.">Est. Cost</a></th>
+        </tr>   
+            </thead>
+            <tbody>
+        <tr><td>Gas</td><td>{{vehicle_stats.gas}}</td><td>{{vehicle_stats.gas_mpg}}</td>
+            <td>{{vehicle_stats.gas_vmt}} M</td><td>{{ vehicle_stats.gas_gals|mil_round }}</td><td>${{vehicle_stats.gas_cost|mil_round}}</td></tr>
+        <tr><td>Diesel</td><td>{{vehicle_stats.diesel}}</td><td>{{vehicle_stats.diesel_mpg}}</td>
+            <td>{{vehicle_stats.diesel_vmt}} M</td><td>{{vehicle_stats.diesel_gals|mil_round}}</td><td>${{vehicle_stats.diesel_cost|mil_round}}</td></tr>
+        <tr><td>Hydrogen</td><td>{{vehicle_stats.h2}}</td><td>{{vehicle_stats.h2_mpg}}</td>
+            <td>{{vehicle_stats.h2_vmt}} M</td><td>{{vehicle_stats.h2_gals|mil_round}}</td><td>${{vehicle_stats.h2_cost|mil_round}}</td></tr>
+        <tr><td>BEV</td><td>{{vehicle_stats.bev}}</td><td>{{vehicle_stats.bev_mpg}}</td>
+            <td>{{vehicle_stats.bev_vmt}} M</td><td>{{vehicle_stats.bev_gals|mil_round}}</td><td>${{vehicle_stats.elec_cost|mil_round}}</td></tr>
+        <tr><td>Sum or mean</td><td>{{vehicle_stats.all}}</td><td>{{vehicle_stats.all_mpg}}</td>
+            <td>{{vehicle_stats.total_vmt}} M</td><td>?</td><td>?</td></tr>
+            </tbody>
+    </table>
+    <div class="spacer"></div>
+
+</div>
+
+    <div class="silver_box">
+    <h3>Score History</h3>
+
+    <table id="scoreme" >
+<thead><tr><th>Year</th>
+    <th>Style</th><th>Performance</th>
+    <th>MPG</th><th>Balance</th><th>Quota %</th>
+    <th>Score</th></tr>
+</thead>
+
+<tbody>
+    {% for cs in my_scores %}
+         <tr><td>{{ cs.year }}</td>
+         <td>{{ cs.style|floatformat:0 }}</td><td>{{ cs.performance|floatformat:0 }}</td>
+         <td>{{ cs.mpg|floatformat:0}}</td><td>{{ cs.balance|floatformat:0 }}</td>
+         <td>{{ cs.quota|floatformat:0 }}</td><td>{{ cs.final }}</td>
+         </tr>
+
+
+    {% endfor %}
+</tbody>
+</table>
+
+    </div>
+
+      <div id="t1" class="fuel_data">
+      <h3>Fuel Volume History (000's of gge)</h3>
+         
+      <div id="fuel_history"></div>
+
+
+      </div>
+
+      <div id='t2' class="fuel_data">
+      <h3>Fuel Expenditures ($ 000's) </h3>
+      <div id="fuel_cost"></div>
+
+
+     </div>
+    </div>
+
+
+
+
+
+
+{% include 'global/includes/footer.html' %}
+

@@ -1,0 +1,544 @@
+{% include 'global/includes/header.html' %}
+<head><title>Vehicle Producer Home</title>
+
+
+{% load auto_extras %}
+
+<script>
+
+     if (MY == undefined) var MY = {}; // Make sure the base namespace exists.
+
+     MY.vids = []
+      {% for veh in onsale %}
+             MY.vids.push({{ veh.id}});
+      {% endfor %}
+
+
+    MY.sales_updater = function(vids){
+        // ajax function that cycles through MY.vids and updates all the sales figures.
+        for (i in vids){
+            vid = vids[i]
+            var s = {}
+           s['arg']=vid
+           s['caller']="vp_home"
+
+           update_sold_vehs(s)
+        }
+    }
+
+    update_sold_vehs = function(s){
+           $(function(){
+              $.get("{% url veh_buy_data %}",s,
+                      function(data){
+                          if(data==-1){
+                              alert("failed")
+                          }else{
+                              $("#num_sold_"+s['arg']).html(data.num_sold)
+                              $("#revenue_"+s['arg']).html(data.revenue)
+                          }
+               },"json")
+            });
+        }
+
+     change_price = function(s){
+          if (isNaN(s['price'])){
+                   alert("Not a number.");
+                   return false;
+               }
+
+               if (s['price'] < 0){
+                   alert("Negative sales price is illegal")
+                   return false
+               }
+
+           $(function(){
+               $.post("{% url vehicle_price_change %}",s,
+                    function(data){
+                        if(data==-1){
+                            alert("failed")
+
+                        } else {
+                            $("#price_change_" + s['id']).html(s['price'])
+                            $("#new_price").html("")
+
+                        }
+                 },"json")
+           });
+        }
+
+         copy_slate = function(){
+             s={}
+             s['fxn']="copy slate"
+
+           $(function(){
+               $.post("{% url ajax_server %}",s,
+                    function(data){
+                        if(data.status==-1){
+                            alert(data.msg)
+                        } else {
+                            if (data.message=="Fund Failure"){
+                                alert("You did not have sufficient funds to rebuild your entire slate. As much as possible \
+                                was built. You can edit the changes.")
+                            }
+                            window.location.reload()
+
+                        }
+                 },"json")
+           });
+        }
+
+      delete_vehicle = function(s){
+
+           $(function(){
+               $.post("{% url delete_vehicle %}",s,
+                    function(data){
+                        if(data==-1){
+                            alert("failed")
+
+                        } else {
+                            alert("Vehicle deleted.")
+                            window.location.reload()
+
+                        }
+                 },"json")
+           });
+        }
+
+         edit_vehicle = function(s){
+
+           $(function(){
+               $.get("{% url edit_vehicle %}",s,
+                    function(data){
+                        if(data==-1){
+                            alert("failed")
+
+                        } else {
+                            window.location.replace(data['url'])
+
+                        }
+                 },"json")
+           });
+        }
+
+
+
+    $(document).ready(function()
+        {
+            var api = new jGCharts.Api()
+            {% autoescape off %}
+            $('<img>').attr('src',api.make({{breakdown_plot}})).appendTo("#breakdown_plot");
+            {% endautoescape %}
+
+            var api2 = new jGCharts.Api()
+            {% autoescape off %}
+            $('<img>').attr('src',api2.make({{market_position}})).appendTo("#market_position");
+            {% endautoescape %}
+
+          var api3 = new jGCharts.Api()
+            {% autoescape off %}
+            $('<img>').attr('src','{{profit_loss}}').appendTo("#profit_loss");
+            {% endautoescape %}
+
+        var api4 = new jGCharts.Api()
+        {%  autoescape off%}
+        var vps = {{ vps  }}
+
+        {%  endautoescape %}
+
+        $('<img>').attr('src', api4.make(vps)).appendTo("#vps");
+
+
+            $("#price_changer").hide()
+            $("#turn_summary_div").hide()
+            $("#ts_toggle").click(function(){
+                $("#turn_summary_div").toggle()
+            });
+
+            $("#turn_summary_closer").click(function(){
+                $("#turn_summary_div").hide()
+            });
+
+            $("#vp_plots_closer").click(function(){
+                $("#vp_plots").hide()
+            });
+            $("#cur_vehicles").dataTable();
+            MY.sales_updater(MY.vids)
+            $("#next_vehicles").dataTable();
+            $("#vp_score").dataTable();
+
+            $("#summary").dataTable({ "aaSorting": [[ 0, "desc" ]]})
+            $("#turn_summary").dataTable({ "aaSorting": [[ 0, "desc" ]]})
+             $(".helper").tipsy();
+            $("#price_changer_button").click(function(){
+
+               $("#price_changer").hide() 
+
+            });
+            $("#shut_price_changer").click(function(){
+                $("#price_changer").hide(speed="slow")
+
+            })
+            //setInterval( "MY.sales_updater(MY.vids)", 6000);
+            $(".vehicle_deleter").click(function(){
+                var s = {}
+                s['vid']=this.id.split("_")[1]
+                delete_vehicle(s);
+
+            });
+
+             $(".vehicle_editor").click(function(){
+                var s = {}
+                s['vid']=this.id.split("_")[1]
+                edit_vehicle(s);
+
+            });
+            $(".price_change").click(function() {
+                $("#new_price").val("")
+               var loc=$(this).position()
+                $("#price_changer").css({'position':'absolute','top':loc.top ,'left':loc.left+90})
+               $("#price_changer").show(speed="slow")
+                $("#vid_to_change").val(this.id.split("_")[2])
+
+
+
+
+            });
+
+            var loc = $("#container").position()
+            var height = $("#container").height()
+            $("#the_rest").css({'top':loc.top+height+50, 'left':'40px', 'position':'absolute'})
+            $("#copy_slate").click(function(){
+               copy_slate()
+            });
+
+            $("#price_changer_button").click(function(){
+                var s = {}
+                s['id'] = $("#vid_to_change").val()
+                s['price'] = $("#new_price").val()
+                change_price(s)
+
+            });
+
+            $("#vp_plots").hide()
+
+            $("#vp_plots_toggle").click(function(){
+                 $("#vp_plots").toggle("fast")
+                if ($("#vp_plots_text").text()=="[hide text]"){
+                    $("#vp_plots_text").text('[show text]')
+                } else {
+
+                    $("#vp_plots_text").text('[hide text]')
+                }
+
+            });
+            //$("#turn_summary_div_close").click(function(){
+              //  $("#turn_summary_div").hide()
+            //})
+        }
+
+
+
+
+);
+
+</script>
+<style>
+    #turn_summary_div{
+        position: absolute;
+        width: 450px;
+        z-index:100;
+        top: 10px;
+        left:150px;
+        background:#888;
+    }
+
+    #container{
+        position: absolute;
+        left:40px;
+        top:120px;
+        width: 600px;
+            margin: auto;
+              padding:0;
+              display: table;
+              }
+
+    .row{
+        display: table-row;
+    }
+
+    .left {
+            width:400;
+            padding:1em;
+            background: #EEF;
+            display: table-cell;
+            opacity:1
+            }
+
+        .right {
+            width:200;
+            padding:1em;
+            background:#FEE;
+        display: table-cell;
+            opacity:1;
+    }
+
+    #vp_plots{
+        position: absolute;
+        top:140px;
+        z-index:100;
+        left:40px;
+        background:#ffffff;
+        opacity:100;
+    }
+
+
+</style>
+</head>
+    <body>
+
+
+    <div id="container">
+        <div class="row"
+        <div class="left" style="border-radius-topleft:15px; -moz-border-radius-topleft:15px; background:#DDD">
+
+                {%  for prompt in prompts %}
+                    <p>{{ prompt.message }}</p>
+
+                {%  endfor %}
+            </div>
+        <div class="right" style="background:#DDD; border-radius-topright:15px; -moz-border-radius-topright:15px"></div>
+
+        </div>
+     <div class="row">
+         <div class="left" style="border-radius-bottomleft:15px;-moz-border-radius-bottomleft:15px">
+            {% include 'vp/includes/base_info.html' %}
+          </div>
+
+         <div class="right" style="border-radius-bottomright:15px; -moz-border-radius-bottomright:15px">
+              <div id="vp_plots_toggle" ><input type="button" value="Performance Charts"></div>
+              <br>
+              <div id="ts_toggle"> <input type="button" value="Performance Data"></div>
+          </div>
+
+     </div>
+    </div> <!-- container end -->
+    {% comment %}
+    <div id="turn_report">
+    <div style="font-weight:bold">Summary Information for {{ user.group }}
+      <span style="font-style:italic">{{ user.username }}</span></div>
+        <p>It is now {{ year }}. You have ${{balance|floatformat:"2"}} M to <a href="/vehicle/new_vehicle/">build
+        vehicles</a> with and {{ user.rd_points }} <a href="/vp/vehicle_r_and_d">RD points to invest</a>.
+        {{ user.turn_report }} For your turn by turn performance summary
+
+    </p>
+
+        <p>It is expected that consumers will buy {{ market_size }} vehicles on the next turn.</p>
+
+        {%  for prompt in prompts %}
+            <p>{{ prompt }}</p>
+       {%  endfor %}
+
+        <div class="big_spacer"></div>
+    </div>
+        {% endcomment %}
+
+
+
+    <div id="vp_plots">
+        <div id="vp_plots_closer" style="float:right">[X]</div>
+        <div class="row">
+            <div class="left">
+               <table >
+                <tr>
+                    <td width=310px >
+                 <div id="breakdown_plot">
+                </div>
+                   How many of your vehicles were on the road in year X, and who bought them?
+                    </td>
+                    <td width=310px >
+                        <div id="market_position">
+                        </div>
+
+                        The percentages of total vehicle purchases by consumers of your vehicles by year.
+                    </td>
+                    </tr>
+                    <tr>
+                        <td width=310px >
+                        <div id="profit_loss">
+                        </div>
+
+                        Profit / Loss over turns.
+                        </td>
+                        <td width=310px >
+                            <div id="vps">
+                            </div>
+
+                            Vehicle Producers Total Market Share Comparison
+                        </td>
+                    </tr>
+                </table>
+
+             </div>
+        </div>
+    </div>
+
+<div id="the_rest">
+{% if onsale %}
+
+        <div id="#vehicles_for_sale">
+			<span class="h3">Vehicles For Sale</span>
+	<table id="cur_vehicles" style="vertical-align:top">
+            <thead>
+            <tr><th>Name</th><th>Drivetrain</th><th>MPG</th>
+                <th>Style</th>  <th><a href="#" class="tipsy" title="Performance">Perf.</a></th>
+                <th>Cost</th><th>Price</th>
+                <th>Produced</th><th>Sold</th><th>Rev. (M)</th><th><a class="helper" href="#" title="Create a vehicle based on this vehicle for next turn.">
+                Copy</a></th></tr>
+            </thead>
+            <tbody>
+	{% for o in onsale %}
+		<tr><td>{{o.name}}</td><td>{{o.drivetrain.name}}</td><td>{{o.mpg}}</td>
+
+                    <td class="colorfy">{{o.style}}</td><td class="colorfy">{{o.performance}}</td>
+                    <td>{{o.production_cost}}</td>
+                    <td><div class="price_change underline" id="price_change_{{o.id}}">{{o.price}}</div></td>
+                    <td>{{o.run}}</td><td><div id="num_sold_{{ o.id }}">{{o.num_sold}}</div></td>
+                        <td><div id="revenue_{{ o.id }}">{{ o.revenue|mil_round }}</div> </td>
+
+                            <form action="/vehicle/new_vehicle/{{o.id}}/" method="GET">
+                           <td> <INPUT TYPE="submit" value="Copy">
+                       </td>
+                       </form>
+                       </tr>
+	{% endfor %}
+            </tbody>
+	</table>
+
+{% else %}
+    <div style="height:15em"></div>
+{% endif %}
+    </div>
+
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div style="position:absolute;left:475px">
+    {%  if onsale %}
+    <input type=button id="copy_slate" value="Copy Slate of Vehicles for Next Turn (Non-binding).">
+        {% endif %}
+    </div>
+{% if scheduled %}
+
+     <a name="delete"></a>
+            <div class="big_spacer"></div>
+			<div class="h3">Vehicles For Next Turn</div>
+	<table id="next_vehicles" >
+            <thead>
+	<tr><th>Name</th><th>Drivetrain</th><th>MPG</th>
+              <th>Style</th>  <th>Performance</th>
+            <th>Cost</th><th>Produced</th><th>Price</th><th>Revenue (M)</th>
+        <th><a href="#" class="tipsy" title="Delete this vehicle.">Delete</a></th></tr></thead>
+            <tbody>
+	{% for o in scheduled %}
+		<tr><td>{{o.name}}</td><td>{{o.drivetrain.name}}</td><td>{{o.mpg}}</td>
+                      <td class="colorfy">{{o.style}}</td><td class="colorfy">{{o.performance}}</td>
+                    <td>{{o.production_cost}}</td><td>{{ o.run }}</td>
+		<td><div class="price_change underline" id="price_change_{{o.id}}">{{o.price}}</div></td>
+        <td>{{ o.revenue }} </td>
+         <td> <input type="button" value="Delete" class="vehicle_deleter" id="delete_{{o.id}}"> </td>
+        </tr>
+	{% endfor %}
+            </tbody>
+	</table>
+
+{% else %}
+    <div style="height:15em"></div>
+{% endif %}
+
+<div class="big_spacer"></div>
+ <div class="h3">Vehicle Sales Performance (Completed Turns)</div>
+{% if summary %}
+
+
+
+    <table id="summary">
+    <thead>
+    <tr><th>Year</th><th>Vehicle</th><th><a href="#" class="tipsy" title="MPG">
+        MPG
+        </a></th><th><a href="#" class="tipsy" title="Style">St.</a> </th>
+        <th><a href="#" class="tipsy" title="Performance">Pe.</a> </th>
+        <th>Sold</th><th>Unsold</th><th>Price</th>
+        <th><a href="#" class="tipsy" title="Net profit on vehicle.">Profit</a></th>
+    <th>Copy</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for v in summary %}
+    <tr>
+        <td>{{ v.turn|to_year }}</td>
+        <td>{{v.vehicle.name}}</td>
+        <td>{{ v.vehicle.mpg }} </td>
+           <td class="colorfy">{{ v.vehicle.style }}</td>
+            <td class="colorfy">{{ v.vehicle.performance }}</td>
+        <td>{{v.sold}}</td>
+        <td>{{v.unsold}}</td>
+        <td>{{ v.vehicle.price }}</td>
+        <td> {{v.profit|floatformat:"2"}} M</td>
+          <form action="/vehicle/new_vehicle/{{v.vehicle.id}}/" method="GET">
+                 <td> <INPUT TYPE="submit" value="Copy">
+                 </td>
+          </form>
+
+
+    </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+    -None-
+
+{% endif %}
+
+
+     <div id="turn_summary_div">
+     <div id="turn_summary_closer" style="float:right;color:white">[X]</div>
+     <h3>Turn Summary Data</h3>
+            {% if tally %}
+    <table id="turn_summary"  style="vertical-align:top">
+        <thead>
+             <tr><th>Year</th><th># Produced</th><th># Sold</th><th># Unsold</th><th>Profit (M)</th><th>RD Points</th></tr>
+        </thead>
+        <tbody>
+        {% for t in tally %}
+            <tr>
+            <td>{{ t.turn|to_year }}</td>
+            <td>{{ t.produced }}</td>
+            <td>{{ t.sold }}</td>
+            <td>{{ t.unsold }}</td>
+            <td>{{ t.profit }}</td>
+            <td>{{ t.free_rd_points }}</td>
+
+            </tr>
+
+        {%  endfor %}
+        </tbody>
+
+    </table>
+
+{% endif %}
+   </div>
+    <div id="price_changer">
+        <span style="float:left">Change Price</span><span id="shut_price_changer" style="float:right">[X]</span>
+        <input type="text" id="new_price"><input type="button" id="price_changer_button" value="Submit">
+        <input type="hidden" id="vid_to_change">
+    </div>`
+    <div class="big_spacer"></div>
+</div>
+
+
+</body>
+</html>
+{% comment %}
+{% include 'global/includes/footer.html' %}
+{% endcomment %}

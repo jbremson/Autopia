@@ -1,0 +1,53 @@
+{%  include "global/includes/header.html" %}
+
+	{% block content %}
+        <script type="text/javascript" language="javascript" src="/site_media/jquery.cookies.2.2.0.min.js">
+        </script>
+	<script type="text/javascript">
+
+        function cookietest(){
+            if ($.cookies.test()==false){
+                alert("Autopia requires cookies (for session management). ")
+                return false
+            }else{
+                return true;
+            }
+
+        }
+
+        $(document).ready(function(){
+            cookietest()
+
+        if ($.browser.msie){
+            alert("Autopia does not work with Internet Explorer. Please use Firefox, Chrome or Safari.")
+        }
+
+
+
+     });
+
+</script>
+
+	  {% if form.errors %}
+	    <p class="error">Sorry, that's not a valid username or password</p>
+	  {% endif %}
+
+     <div id="bound_div">
+	  <form action="." method="post" id="login_form">{% csrf_token %}
+
+	    <div id="spacer"></div>
+	    <label for="username">User name:</label>
+	    <input type="text" name="username" value="" id="username">
+	    <label for="password">Password:</label>
+	    <input type="password" name="password" value="" id="password">
+
+	    <input type="submit" value="login" onSubmit="return cookietest()">
+	    <input type="hidden" name="next" value="/home" />
+	  </form>
+
+</div>
+	 {% endblock %}
+<div class="big_spacer"></div>
+
+{% include "global/includes/footer.html" %}
+

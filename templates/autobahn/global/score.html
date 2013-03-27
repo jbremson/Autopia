@@ -1,0 +1,72 @@
+{% include 'global/includes/header.html' %}
+
+
+
+{% block content %}
+
+<script>
+
+    $(document).ready(function()
+        {
+            $("#scoreme").dataTable({bFilter:false});
+            $("#accum").dataTable({bFilter:false});
+
+        }
+    );
+
+</script>
+
+{% load auto_extras %}
+<h1> Scores </h1>
+
+<h3>Consumer Scores - Game Accumulated</h3>
+
+<table id="accum" class="tablesorter">
+<thead>
+<tr>
+<th>Consumer</th><th>Score</th>
+</tr>
+</thead>
+<tbody>
+    {% for con in consumers %}
+        <tr><td>{{con.username}}</td><td>{{con.sum_score}}</td></tr>
+
+
+    {% endfor %}
+
+
+</tbody>
+</table>
+
+
+
+<h3>Consumer Scores - Last Turn</h3>
+
+
+
+<table id="scoreme" class="tablesorter">
+<thead><tr><th>Consumer</th><th>Year</th>
+    <th>Style</th><th>Performance</th>
+    <th>MPG</th><th>Quota %</th>
+    <th>Score</th></tr>
+</thead>
+
+<tbody>
+    {% for cs in con_cur_scores %}
+         <tr><td>{{ cs.user.username }}</td><td>{{ cs.year }}</td>
+         <td >{{ cs.style|floatformat:0 }}</td><td >{{ cs.performance|floatformat:0 }}</td>
+         <td >{{  cs.mpg|floatformat:0}}</td>
+         <td>{{ cs.quota|percentage }}</td><td>{{ cs.final }}</td>
+         </tr>
+
+
+    {% endfor %}
+</tbody>
+</table>
+
+<br>
+
+
+
+
+{% endblock %}

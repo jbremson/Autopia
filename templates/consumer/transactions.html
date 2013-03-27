@@ -1,0 +1,93 @@
+{% include 'global/includes/header.html' %}
+
+        <head>
+
+            <title>Transaction Records</title>
+        </head>
+
+{% include 'consumer/includes/user_info.html' %}
+<h1>Vehicle Transactions</h1>
+
+<script>
+
+    $(document).ready(function()
+        {
+            $("#trans").dataTable()
+//            $("#trans").tablesorter({sortList:[[0,1]]})
+//             .tablesorterPager({container: $("#pager"),positionFixed:false});
+
+            $("#income").dataTable()
+//            $("#income").tablesorter({sortList:[[0,1]]})
+//             .tablesorterPager({container: $("#pager2"),positionFixed:false});
+
+            $("#fuel").dataTable()
+//             $("#fuel").tablesorter({sortList:[[0,1]]})
+//             .tablesorterPager({container: $("#pager3"),positionFixed:false});
+
+
+
+        }
+    );
+
+</script>
+
+<table id="trans">
+<thead><tr><th>Year</th><th>Recipient</th><th>Vehicle</th><th>Quantity</th><th>Fees</th></th><th>Amount</th></tr>
+</thead>
+<tbody>
+{% for veh in vehicle_buys  %}
+     <tr><td>{{ veh.year }}</td><td><div class="send_message_link">{{ veh.seller.username }}</div></td><td>{{ veh.vehicle }}</td><td>{{ veh.quantity }}</td><td>
+     ${{ veh.fees|floatformat:"3" }} M
+     </td><td>${{ veh.amount|floatformat:"1" }} M</td></tr>
+
+
+{% endfor %}
+
+
+</tbody>
+
+
+</table>
+
+
+<h1>Income</h1>
+
+<table id="income">
+<thead><tr><th>Year</th><th>From</th><th>To</th><th>Account</th><th>Desc</th><th>Comment</th><th>Amount</th></tr>
+</thead>
+<tbody>
+{% for tr in transactions  %}
+     <tr><td>{{ tr.year }}</td><td><div class="send_message_link">{{ tr.buyer.username }}</div></td>
+         <td><div class="send_message_link">{{ tr.seller.username }}</div></td>
+         <td>{{ tr.account }}</td><td>{{ tr.desc }}</td><td>{{ tr.comment }}</td><td>${{ tr.amount|floatformat:"1" }} M</td></tr>
+
+
+{% endfor %}
+
+
+</tbody>
+
+
+</table>
+
+
+<h1>Fuel</h1>
+
+<table id="fuel">
+<thead><tr><th>Year</th><th>Quant.</th><th>Fuel</th><th>Amount</th></tr>
+</thead>
+<tbody>
+{% for tr in fuels  %}
+     <tr><td>{{ tr.year }}</td><td>{{ tr.quantity }}</td><td>{{ tr.fuel }}</td><td>${{ tr.amount|floatformat:"1" }} M</td></tr>
+
+
+{% endfor %}
+
+
+</tbody>
+
+
+</table>
+
+<div style="padding-bottom:30px"></div>
+{% include 'global/includes/footer.html' %}

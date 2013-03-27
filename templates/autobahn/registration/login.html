@@ -1,0 +1,77 @@
+{%  include "global/includes/header.html" %}
+
+<head>
+{% comment %}
+AUTOBAHN!
+{% endcomment %}
+	{% block content %}
+        <script type="text/javascript" language="javascript" src="/site_media/jquery.cookies.2.2.0.min.js">
+        </script>
+	<script type="text/javascript">
+
+        function cookietest(){
+            if ($.cookies.test()==false){
+                alert("Autopia requires cookies (for session management). ")
+                return false
+            }else{
+                return true;
+            }
+
+        }
+
+        $(document).ready(function(){
+            cookietest()
+
+        if ($.browser.msie){
+            alert("Autopia does not work with Internet Explorer. Please use Firefox, Chrome or Safari.")
+        }
+
+
+
+     });
+
+</script>
+
+        <style>
+        #login_table {font-size: 15px; border-width:0px; padding-left:60px; padding-bottom:20px}
+
+
+        </style>
+
+
+</head>
+<body>
+
+        <table class="main_table">
+  <tr><td>
+	  {% if form.errors %}
+	    <p class="error">Sorry, that's not a valid username or password</p>
+	  {% endif %}
+
+        <div class="bound_div">
+	  <form action="." method="post" id="login_form">{% csrf_token %}
+
+	    <div id="spacer"></div>
+          <table id="login_table">
+        <tr><td>
+        <label for="username">Player Name:</label><br>
+            <input type="text" name="username" value="" id="username">
+	    </td></tr>
+              <tr><td>
+	    <label for="password">Password:</label><br>
+	    <input type="password" name="password" value="" id="password">
+
+              </td></tr>
+              <tr><td>
+	    <input type="submit" value="login" onSubmit="return cookietest()">
+	    <input type="hidden" name="next" value="/home" />
+              </td></tr>
+	  </form>
+        </table>
+
+</div> </td></tr></table>
+	 {% endblock %}
+<div class="big_spacer"></div>
+
+{% include "global/includes/footer.html" %}
+

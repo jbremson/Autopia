@@ -1,0 +1,101 @@
+{% include 'global/includes/header.html' %}
+        <head><title>Global Fleet Info</title></head>
+
+<script>
+
+
+
+    $(document).ready(function(){
+
+
+      
+
+        var api = new jGCharts.Api();
+                    //2) options
+        {% autoescape off %}
+        var opt =  {{ drivetrain_quantity }}
+
+        {% endautoescape %}
+        $('<img>').attr('src', api.make(opt)).appendTo("#drivetrain_quantity");
+
+        var api2 = new jGCharts.Api()
+        {%  autoescape off%}
+        var vps = {{ vp_profits  }}
+
+        {%  endautoescape %}
+
+        $('<img>').attr('src', api2.make(vps)).appendTo("#vps");
+
+{#        {%  autoescape off %}#}
+{#         var fuel = {data: {{drivetrain_by_fuel}}, title:"Primary Fuel Distribution", bar_width:30, size:'400x300',type:'bvs', axis_labels:{{years}}, legend:{{ fuel_labels }} }#}
+{#        {% endautoescape %}#}
+
+        $('<img>').attr('src', api.make(fuel)).appendTo("#drivetrain_by_fuel");
+
+
+
+
+
+
+
+
+    })
+</script>
+
+<body>
+
+
+<table class="main_table">
+    <tr>
+        <td>
+    <div class="med_type" > Fleet Information</div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="bound_div">
+
+                <div id="vps"></div>
+                Money available to producer at the end of the turn.
+            </div>
+
+        </td>
+
+    </tr>
+<tr>
+
+<td>
+<div class="bound_div">
+<div id="drivetrain_quantity"></div>
+    Breakdown by drivetrain of all vehicles on the road in a given year. This shows the
+    year over year transformation of the fleet.<br>
+</div>
+</td>
+</tr>
+
+{#<tr>#}
+{#    <td>#}
+{#        <div class="bound_div">#}
+{#            <div id="drivetrain_by_fuel" style="width:400px;background-color:red;"></div>#}
+{#            Fleet breakdown by year and primary fuel type.#}
+{#         </div>#}
+{#    </td>#}
+{#</tr>#}
+
+<tr>
+<td>
+    <div class="bound_div">
+<div style="width:400px;height:70px;background-color:lightgreen">
+Detailed vehicle sales data in csv format for spreadsheet analysis.<Br>
+<br><a href="{% url vehicle_sales_data %}" > Click here for download. </a>
+</div></div>
+</td></tr>
+
+</table> <!-- end main_table -->
+
+
+
+
+
+</body>
+</html>

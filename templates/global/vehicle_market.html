@@ -1,0 +1,364 @@
+{% include 'global/includes/header.html' %}
+
+        <head><title>Vehicle Market - Autopia</title></head>
+
+<script type="text/javascript">
+
+
+    var MY = {};
+    MY.style_avg = {{ avgs.style__avg }}
+    MY.performance_avg = {{ avgs.performance__avg }}
+    MY.mpg_avg = {{ avgs.mpg__avg }}
+    MY.price_avg = {{ avgs.price__avg  }}
+    MY.interval = ""
+    MY.funds = {{user.balance|floatformat:2}}
+    MY.counter = 0 // use this to make setInterval doesn't go '
+
+    function buy_vehicle(){
+
+        s={'function':'buy_vehicle'}
+        s['arg']=$("#vid").val()
+        s['to_buy']=$("#to_buy").val()
+        s['comment']=$("#buy_vehicles_comment").val()
+
+       $(function(){
+           $.post("{% url app.views.buy_vehicle %}",s,
+                   function(data){
+                       $("#msg").text(data.msg)
+                       $("#msg").show()
+                       if (data.status==1){
+                            $("#buy_vehicles_comment").val("")
+                            setTimeout("$('#buy_vehicles').hide('slow');",1700)
+                       }else {
+                       }
+                   },"json");
+            } // close the internal fxn
+        )//close the function call
+
+    }
+
+
+    $(document).ready(function()
+        {
+
+//            $.tablesorter.addParser({
+//                // set a unique id
+//                id:'buyers',
+//                    // return false so this parser is not auto detected
+//                is: function(s){
+//                    return false;
+//                },
+//                format: function(s) {
+//                    // format your data for normalization
+//                    return s.replace(/.*/,s.length)
+//                },
+//                // set type, either numeric or text
+//                type: 'numeric'
+//            });
+            update_max_vals();
+            MY.max_val_interval=setInterval("update_max_vals()",3300)
+            $("#buy_vehicles").hide({})
+            $("#sale_vehicles").dataTable( {"aoColumns":[null,null,null,
+                    null,null,null,{"sType":"numeric"},null,null,null]});
+            //$("#sale_vehicles").tablesorter({widthFixed: true,
+            //{% ifequal group "Consumer" %} sortList:[[9,0],[7,0]]}) {% else %} headers: { 9: {sorter:'buyers'}}, sortList:[[7,0]]}){% endifequal %}
+
+            //.tablesorterPager({container: $("#pager"),positionFixed:false});
+            $(".veh_info").hide()
+            $(".veh_info").click(function(){$(this).hide(); return true;});
+            $("#purchase").click(buy_vehicle);
+            $("#max_purchasable").click(function(){
+                out = Math.floor(MY.funds*1000000 / parseInt($("#price").html()))
+                count = parseInt($("#count").html())
+                final = Math.min(out,count)
+                $("#to_buy").val(final)
+
+                    });
+            $("#cancel_purchase").click(function(){$("#buy_vehicles").hide();
+                MY.counter=0;
+                window.clearInterval(MY.interval);
+                window.clearInterval(MY.int2);
+                $("#msg").text('')
+                return true;});
+            $("#to_buy").keydown(function(){$("#msg").hide('slow'); return true;});
+         }
+    );
+
+    function cost_info(id){
+           var out = $("#cost_"+id).position()
+           var x = out.left
+           var y = out.top
+           $("#show_"+id).css('position','absolute')
+           $("#show_"+id).css("left",x)
+           $("#show_"+id).css("top",y)
+           $("#show_"+id).css("height","4em")
+           $("#show_"+id).css("width",160)
+           $("#show_"+id).css("background-color","#E1E8EF")
+           $("#show_"+id).css({"border-style":'solid','border-width':'2px'})
+           $("#show_"+id).show('fast')
+    }
+
+
+    function update_veh(){
+        //get the latest price and max vehicle count for this vehicle
+        if ($("#buy_vehicles").is(':visible')){
+            if (MY.counter==60){
+                out = confirm("Timed out. Continue?")
+                if (out==true){
+                    MY.counter=0
+                }else{
+                    $("#buy_vehicles").hide('slow')
+                }
+            }
+            MY.counter=MY.counter+1
+            s={}
+
+
+            s['fxn']='price_and_count'
+            s['arg']=$("#vid").val()
+            s['caller']="buy_screen"
+            $(function(){
+               $.get("{% url veh_buy_data %}",s,
+                       function(data){
+                           if ($("#msg").text()=="loading..."){
+                                $("#msg").hide()
+                           }
+                           if(data==-1){
+                               alert("failed")
+                           }else{
+                               change_val($("#price"),data.price)
+                               change_val($("#count"),data.count)
+                               change_val($("#veh_name"),data.name)
+                               var total=$("#to_buy").val() * parseInt(data.price)/1000000
+                               total = Math.round(total*100)/100
+
+                               change_val($("#total"),total)
+
+                           }
+                },"json")
+            });
+        }
+    }
+
+   function update_max_vals(){
+       s = {}
+       s['caller']='update_max_vals'
+
+       //get all the max buy vals for the vehicle ids of the market
+
+          $(function(){
+               $.get("{% url veh_buy_data %}",s,
+                       function(data){
+                           if(data==-1){
+                               alert("failed")
+                           }else{
+                               //returns a hash of id:max_val
+                               //iterate the hash and change the values of the ids
+
+                               for (var key in data){
+                                  change_val($(key),data[key])
+                               }
+                               $("#sale_vehicles").trigger("update");
+
+
+                           }
+                },"json")
+            });
+
+
+
+
+
+
+   }
+   function navConfirm(vid) {
+       var max=$("#get_max_" + vid).text()
+       $("#count").val(max)
+
+       if (max==0){
+           alert("No vehicles of this type currently available.")
+           return false
+           
+       }
+       MY.counter=0
+       $("#to_buy").val(20)
+       $("#buy_vehicles").hide("slow")
+
+       var out = $("#nav_"+vid).position()
+       var x = out.left-300
+       var y= out.top
+       $("#vid").val(vid)
+       $("#buy_vehicles").css({"position":'absolute',"padding":"10px","background":"white",
+                   "left":'40%',"top":'40%',"height":140,"width":400,"z-index":39})
+       $("#buy_vehicles").css({"border-style":'solid','border-width':'2px','font-size':'1.5em'})
+       $("#buy_vehicles").css("background-color","#E1E8EF")
+       $("#buy_vehicles").show("slow")
+       $("#msg").text('loading...')
+       $("#msg").css("background-color","white")
+        MY.interval=setInterval("update_veh()",2300)
+
+
+     }
+
+
+//-->
+</script>
+
+
+
+<style>
+    #sale_vehicles {font-size: 1.1em}
+
+</style>
+
+{% comment %}
+      <!-- taking out vp_ranking table. I don't think it is used. -->
+        {% include 'global/includes/vp_ranking.html' %}
+{% endcomment %}
+
+{% load auto_extras %}
+<table class="main_table">
+    <tr><td>
+        <div class="bound_div">
+            {% ifequal group "Consumer" %}
+                <ul>
+                    <li> Funds: $ <span id="balance"> </span> M </li>
+                    <li> You need to buy <span id="turn_vehicle_goal"></span> more cars to make your quota. </li>
+                    <li> To make your quota your average purchase price will be about: <span id="dynamic_average"></span> k</li>
+
+                </ul>
+            {% endifequal %}
+
+
+
+
+
+
+            <!-- start buy_vehicles div %%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$  -->
+
+
+            <div id="buy_vehicles">
+                <span id="msg"></span><br>
+                Buy <input type="text" id="to_buy" size="3">(Avail. <span id="count"></span>)
+                <input type="button" value="Max Purchasable" id="max_purchasable"><br>
+                <span id="veh_name"></span>'s @
+                $<span id="price"></span><br>
+
+                <br>
+
+                Total=$<span id="total"></span>M
+                <div id="vid"></div>
+                <input type="button" value="Cancel" class="buy_button" id="cancel_purchase">
+                <input type="button" value="Make Purchase" class="buy_button" id="purchase">
+            </div>
+        </div>
+    </td></tr>
+</table>
+    {#<a href="{% url fuel_station %}">#}
+    {#<div id="fuel_info" style="border-width:2px">#}
+    {#<table>#}
+    {#<thead><tr><th>Fuel Type</th><th><a href="#" class="tipsy" title="$ per gallon of gas equivalent (120 MJ of fuel)">$/Gallon </a></th></tr></thead>#}
+    {#<tbody>#}
+    {#<tr><td>Gasoline</td><td>{{ gas_price|floatformat:2 }}</td></tr>#}
+    {#<tr><td>Diesel</td><td>{{ diesel_price|floatformat:2 }}</td></tr>#}
+    {#<tr><td>Hydrogen</td><td>{{ h2_price|floatformat:2 }}</td></tr>#}
+    {#<tr><td>Electricity</td><td>{{ elec_price|floatformat:2 }}</td></tr>#}
+    {##}
+    {#</tbody>#}
+    {#</table>#}
+    {#</div>#}
+    {#    </a>#}
+    <!-- End buy_vehicles div %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+{#    <tr><td>#}
+{#        <div class="bound_div">#}
+{#            <div style="width:340px;background-color:lightblue">Sale Status: <span id="status"></span></div>#}
+{##}
+{#            <table id="sale_vehicles" class="odd" border="0" cellpadding="0" cellspacing="3">#}
+{#                <thead>#}
+{#                <tr>#}
+{#                    <th class="header">Prod.</th>#}
+{#                    <th class="header">Name</th>#}
+{#                    <th class="header"><a class="tipsy" title="See drivetrain abbreviations in the table below this.">Type</a></th>#}
+{#                    <th class="header">MPG</th>#}
+{#                    <th class="header">Style</th>#}
+{#                    <th class="header">Perf.</th>#}
+{#                    <th class="header tipsy" title="If price sorting is not working reload the page.">Price</th>#}
+{#                    <th class="header"><a href="#" class="tipsy" title="Fuel cost per turn. VMT of 12000 for 4 years.">#}
+{#                        Op. Cost</a></th>#}
+{#                    <th class="header>#}
+{#                    <a class="tipsy" title="Max number of vehicles available.">Max.</a>#}
+{#                    </th>#}
+{#                    {% ifequal group "Consumer" %}#}
+{#                        <th class="header">#}
+{#                            <a class="tipsy" title="A relative score based on your user profile. It is based on standardized averages of all the current vehicles and your profile weights. This is a guide value.">S*</a></th>#}
+{#                        <th class="header">Buy</th>#}
+{#                    {%  else  %}#}
+{#                        <th class="header"><a class="tipsy" title="Consumer groups who have bought this vehicle.">Buyers</a></th>#}
+{#                    {% endifequal %}#}
+{#                </tr>#}
+{#                </thead>#}
+{#                <tbody>#}
+{#                {% for v in vehicle_market %}#}
+{#                    <tr id="tr_{{ v.id }}" class="odd">#}
+{#                        <td><div class="send_message_link">{{v.producer.username}}</div></td>#}
+{#                        <td>{{v.name}}</td>#}
+{#                        <td><a class="tipsy" title="{{ v.drivetrain.desc }}">{{v.drivetrain.name}}</a></td>#}
+{#                        <td>{{v.mpg|floatformat:0}}</td> <td class="colorfy">{{v.style}}</td> <td class="colorfy">{{v.performance}}</td>#}
+{##}
+{#                        {% ifequal user.group "Vehicle Producer" %}#}
+{#                            {% ifequal user.username v.producer.username %}#}
+{#                                <td class="price_change underline" id="price_change_{{v.id}}">{{v.price}}</td>#}
+{#                            {% else %}#}
+{#                                <td class="price" id="price_{{v.id}}">{{v.price}}</td>#}
+{#                            {% endifequal %}#}
+{#                        {% else %}#}
+{#                            <td class="price" id="price_{{v.id}}">{{v.price}}</td>#}
+{#                        {% endifequal %}#}
+{#                        <td>{{v.op_cost|floatformat:"0"}}</td>#}
+{##}
+                        {#                    <td>#}
+                        {#                       <div id="get_max_{{v.id}}" class="get_max">0</div>#}
+                        {#                    </td>#}
+{#                        <td id="get_max_{{v.id}}" class="get_max">0</td>#}
+{#                        {% ifequal group "Consumer" %}#}
+{#                            <td>{{v.quick_score}}</td>#}
+{#                            <td>#}
+{#                                <input type=button value="Buy" id="nav_{{ v.id }}" onClick="navConfirm({{v.id}});">#}
+{##}
+{##}
+{##}
+{#                            </td>#}
+{#                        {% else %}#}
+{#                            <td id="buyers_{{ v.id }}"></td>#}
+{#                        {% endifequal %}#}
+{##}
+{##}
+{#                    </tr>#}
+{##}
+{#                {% endfor %}#}
+{#                </tbody>#}
+{##}
+{#            </table>#}
+{##}
+{#        </div>#}
+{#    </td></tr>#}
+{#    <tr><td>#}
+{#        <div class="dt_abbrev bound_div" >#}
+{##}
+{#            Drivetrain Abbreviations Glossary#}
+{#            {% include "global/drivetrain_abbrev.html" %}#}
+{##}
+{##}
+{##}
+{#        </div>#}
+{##}
+{##}
+{#    </td></tr>#}
+{#</table>#}
+<div id="price_changer">
+    <span style="float:left">Change Price</span><span id="shut_price_changer" style="float:right">[X]</span>
+    <input type="text" id="new_price"><input type="button" id="price_changer_button" value="Submit">
+    <input type="hidden" id="vid_to_change">
+</div>
+{% include 'global/includes/footer.html' %}

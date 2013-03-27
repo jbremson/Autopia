@@ -1,0 +1,45 @@
+{% include 'global/includes/header.html' %}
+<head><title>Make Transaction</title></head>
+
+{% load auto_extras %}
+{% block content %}
+<script type="text/javascript">
+   function verify(){
+    var out = $("#id_amount").val().replace(/\,/g,"")
+    $("#id_amount").val(out)
+       //Throw up a confirm screen for the transaction.
+    if ($("#id_amount").val() > 5000){
+        alert("Maximum possible transfer is $5,000k ($5M)")
+        $("#id_amount").val("")
+        return false
+
+    }
+    if ($("#id_comment").val()==""){
+        alert("Please provide a comment on the transaction.")
+        return false
+
+    }
+    var str="Transfer $"+$("#id_amount").val() + "k to " + $('#id_seller :selected').text() + "?"
+    return confirm(str)
+
+    }
+
+    $(document).ready(function(){
+
+    })
+
+</script>
+<h1> Transaction (transfer funds to another player)</h1>
+
+
+<form id="transform" method="POST" onSubmit="return verify();" >{% csrf_token %}
+<table>
+
+ {{ form }}
+
+
+</table>
+    <input type="submit" value="Submit Transfer" >
+</form>
+
+{% endblock content %}

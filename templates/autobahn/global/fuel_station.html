@@ -1,0 +1,222 @@
+{% include 'global/includes/header.html' %}
+        <head><title>Autobahn Fuel Info</title></head>
+{% load auto_extras %}
+
+<style>
+
+    .lefter { float:left}
+</style>
+
+
+<script>
+
+
+
+    $(document).ready(function(){
+
+
+
+        $("#cafes").dataTable({
+		"bPaginate": false,
+		"bLengthChange": false,
+		"bFilter": false,
+		"bSort": true,
+		"bInfo": false,
+		"bAutoWidth": false });
+
+        $("#global_ledger_table").dataTable({ "aaSorting":[[0,"desc"]], "iDisplayLength":20});
+
+        var bar = {{ bar_width }}
+        var api = new jGCharts.Api();
+                    //2) options
+        {% autoescape off %}
+        var opt = {data: {{ fuel_history }}, type: 'bvs', axis_labels:{{ history_labels }},
+            bar_width:bar, legend:{{ history_legend }}};//set options
+        var cost = {data: {{ fuel_cost }},  type: 'bvs', axis_labels:{{ history_labels }},
+              bar_width:bar, legend:{{ history_legend }}};//set options
+
+       var price_history = {data: {{ price_history }}, type: 'lc', axis_labels:{{ long_labels }},
+                      bar_width:bar, legend:{{ history_legend }}};//set options
+
+
+       var elec_history = {data: {{ e_data }}, type: 'lc', axis_labels:{{ e_labels }},
+                bar_width:bar, legend:{{ e_legend }}};//set options
+
+        {% endautoescape %}
+        //3) append img
+
+//
+         $('<img>').attr('src', api.make(price_history)).appendTo("#price_history");
+        $('<img>').attr('src', api.make(opt)).appendTo("#fuel_history");
+//
+//         $('<img>').attr('src', api.make(cost)).appendTo("#fuel_cost");
+//        $('<img>').attr('src', api.make(elec_history)).appendTo("#elec_history");
+
+
+
+
+
+    })
+</script>
+
+<table class="main_table">
+<tr><td style="align:center">
+    <div class="bound_div rounded">
+    <span style="margin-left:50px">
+        <table title="Current fuel prices." class="ledger" style="width:240px">
+        <thead><tr style="text-align: left"><th>Fuel</th><th>$/Gal.</th></tr></thead>
+        <tbody>
+        <tr class="odd"><td>Gasoline</td><td>{{ gas_price|floatformat:2 }}</td></tr>
+        <tr><td>Diesel</td><td >{{ diesel_price|floatformat:2 }}</td></tr>
+        <tr class="odd"><td>Hydrogen</td><td>{{ h2_price|floatformat:2 }}</td></tr>
+        <tr><td>Electricity</td><td>{{ elec_price|floatformat:2 }}</td></tr>
+
+        </tbody>
+        <caption class="caption"> Fuel Prices</caption>
+        </table>
+
+    </span>
+    <a name="cafe_reqs"></a>
+    <span style="padding-left:50px;float:left">
+        <table id="cafes" class="ledger" title="CAFE requirements to meet by year." style="float:right;width:200px">
+            <thead>
+            <tr><th>Year</th><th>MPG</th></tr>
+            </thead>
+            <tbody>
+            {% for val in cafes.items %}
+            <tr><td>{{val.0}}</td><td>{{val.1}}</td></tr>
+            {% endfor %}
+
+        </tbody>
+            <caption class="caption"> CAFE Info</caption>
+        </table>
+    {#    CAFE penalty is $55 per mpg X number of vehicles sold.#}
+    </span>
+    </div>
+</td></tr>
+
+<tr><td>
+
+<div class="bound_div rounded">
+    <table>
+        <tr>
+            <td>
+                <span class="caption">Fuel Price History</span>
+            <span id="price_history"></span>
+            </td>
+            <td>
+                <span class="caption">Fuel Volume History</span>
+            <span id="fuel_history"></span>
+            </td>
+        </tr>
+    </table>
+</div>
+</td></tr>
+
+{#  start global_ledger section #}
+<a name="transactions"></a>
+<tr> <td>
+        <div class="bound_div rounded">
+            <div class="med_type">  Global Sales and CAFE Penalties</div>
+            {% if global_ledger %}
+                <table id="global_ledger_table" class="ledger" style="padding-bottom:0px">
+                    <thead>
+                    <tr style="text-align:left"><th>Year</th><th>Mfgr.</th><th>Description</th><th>Vehicle</th><th>Style</th><th>Perf.</th></th><th>Amount (M)</th><th>Copy</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for row in global_ledger %}
+                        <tr><td>{{row.year|floatformat:"0"}}</td><td>{{ row.producer }}</td><td>{{ row.desc }}</td><td style="display:table-cell;vertical-align: top">{{ row.vehicle|default_if_none:"" }}
+                        </td>
+                        <td>{{ row.style }}</td><td>{{ row.performance }}</td>
+                          <td>{{ row.amount|floatformat:"1" }} </td>
+                            <td style="align:center">
+                                {% if row.id %}
+                                    <form action="/vehicle/new_vehicle/{{row.id|floatformat:"0"}}/" method="GET">
+                                        <INPUT TYPE="submit" class="button" value="Copy">
+                                    </form>
+                                {% endif %}
+                            </td>
+
+
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No ledger data.</p>
+            {% endif %}
+
+
+
+        </div>
+
+</td> </tr>
+
+
+
+
+</table> <!-- end of main_table -->
+<div class="big_spacer"></div>
+
+
+</td>
+    <td valign="top">
+
+</td>
+</table><!-- <div id="fuel_caption" class="fuel_border">Current Fuel Prices</div> -->
+
+{#<div class="big_spacer"></div>#}
+{##}
+{#<table>#}
+{#<tr>#}
+{#    <td>#}
+{#<h3>Fuel Price History ($/gge)</h3>#}
+{##}
+{#    </td><td>#}
+{##}
+{##}
+{#    </td>#}
+{##}
+{#<tr>#}
+{#<td>#}
+{#<h3>Fuel Gross Revenue History (000's $)</h3>#}
+{##}
+{#<div id="fuel_cost"></div>#}
+{#</td><td>#}
+{##}
+{#        <h3>Electricity Data (000's of gge)</h3>#}
+{##}
+{#        <div id="elec_history"></div></td>#}
+{#</tr>#}
+{##}
+{##}
+{#<tr>#}
+{#    <td>#}
+{#    <img src="{{ charts.gas }}">#}
+{#</td>#}
+{##}
+{#    <td>#}
+{#        <img src="{{ charts.diesel }}">#}
+{#    </td>#}
+{##}
+{##}
+{#</tr>#}
+{##}
+{#<tr>#}
+{#    <td>#}
+{#    <img src="{{ charts.h2 }}">#}
+{#</td>#}
+{##}
+{#    <td>#}
+{#        <img src="{{ charts.elec }}">#}
+{#    </td>#}
+{##}
+{##}
+{#</tr>#}
+{##}
+{#</table>#}
+{##}
+{##}
+{##}
+{##}
+

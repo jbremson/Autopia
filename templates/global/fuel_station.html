@@ -1,0 +1,147 @@
+{% include 'global/includes/header.html' %}
+        <head><title>Fuel Info</title></head>
+{% load auto_extras %}
+
+
+
+
+<script>
+
+
+
+    $(document).ready(function(){
+
+
+        $("#cafes").dataTable({
+		"bPaginate": false,
+		"bLengthChange": false,
+		"bFilter": false,
+		"bSort": true,
+		"bInfo": false,
+		"bAutoWidth": false });
+
+        var bar = {{ bar_width }}
+        var api = new jGCharts.Api();
+                    //2) options
+        {% autoescape off %}
+        var opt = {data: {{ fuel_history }}, type: 'bvs', axis_labels:{{ history_labels }},
+            bar_width:bar, legend:{{ history_legend }}};//set options
+        var cost = {data: {{ fuel_cost }},  type: 'bvs', axis_labels:{{ history_labels }},
+              bar_width:bar, legend:{{ history_legend }}};//set options
+
+       var price_history = {data: {{ price_history }}, type: 'lc', axis_labels:{{ long_labels }},
+                      bar_width:bar, legend:{{ history_legend }}};//set options
+
+
+       var elec_history = {data: {{ e_data }}, type: 'lc', axis_labels:{{ e_labels }},
+                bar_width:bar, legend:{{ e_legend }}};//set options
+
+        {% endautoescape %}
+        //3) append img
+
+
+         $('<img>').attr('src', api.make(price_history)).appendTo("#price_history");
+        $('<img>').attr('src', api.make(opt)).appendTo("#fuel_history");
+
+         $('<img>').attr('src', api.make(cost)).appendTo("#fuel_cost");
+        $('<img>').attr('src', api.make(elec_history)).appendTo("#elec_history");
+
+
+
+
+
+    })
+</script>
+
+<div class="big_spacer"></div>
+<table>
+    <td valign="top">
+ <h3 >Fuel Prices</h3>
+<table class='fuel_border'>
+<thead><tr><th>Fuel Type</th><th>$/Gallon (equivalent)</th></tr></thead>
+<tbody>
+<tr><td>Gasoline</td><td>{{ gas_price|floatformat:2 }}</td></tr>
+<tr><td>Diesel</td><td>{{ diesel_price|floatformat:2 }}</td></tr>
+<tr><td>Hydrogen</td><td>{{ h2_price|floatformat:2 }}</td></tr>
+<tr><td>Electricity</td><td>{{ elec_price|floatformat:2 }}</td></tr>
+
+</tbody>
+
+</table>
+
+</td>
+    <td valign="top">
+ <h3>CAFE Requirements</h3>
+<table id="cafes">
+    <thead>
+    <tr><th>Year</th><th>MPG</th></tr>
+    </thead>
+    <tbody>
+    {% for val in cafes.items %}
+    <tr><td>{{val.0}}</td><td>{{val.1}}</td></tr>
+    {% endfor %}
+
+</tbody>
+</table>
+CAFE penalty is $55 per mpg X number of vehicles sold.
+</td>
+</table><!-- <div id="fuel_caption" class="fuel_border">Current Fuel Prices</div> -->
+
+<div class="big_spacer"></div>
+
+<table>
+<tr>
+    <td>
+<h3>Fuel Price History ($/gge)</h3>
+
+<div id="price_history"></div>
+    </td><td>
+
+<h3>Fuel Volume History (000's of gge)</h3>
+
+<div id="fuel_history"></div>
+    </td>
+
+<tr>
+<td>
+<h3>Fuel Gross Revenue History (000's $)</h3>
+
+<div id="fuel_cost"></div>
+</td><td>
+
+        <h3>Electricity Data (000's of gge)</h3>
+
+        <div id="elec_history"></div></td>
+</tr>
+
+
+<tr>
+    <td>
+    <img src="{{ charts.gas }}">
+</td>
+
+    <td>
+        <img src="{{ charts.diesel }}">
+    </td>
+
+
+</tr>
+
+<tr>
+    <td>
+    <img src="{{ charts.h2 }}">
+</td>
+
+    <td>
+        <img src="{{ charts.elec }}">
+    </td>
+
+
+</tr>
+
+</table>
+
+
+
+
+

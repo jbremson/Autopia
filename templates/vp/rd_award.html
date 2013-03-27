@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+
+{% block usernav %}
+    {% include "vp/vp_nav.html" %}
+    <div class="spacer"></div>
+{% endblock %}
+
+{% block message %} 
+    {{message}}
+{% endblock %}
+
+{% block content %}
+
+<script>
+    $(document).ready(function()
+
+        {
+
+            $("#rules_div").hide()
+            $(".toggle_rules").toggle(function(){
+                $("#rules_div").show('slow')
+                $(".toggle_rules").text("[hide rules table]")
+            }, function(){
+                $("#rules_div").hide('slow')
+                $(".toggle_rules").text("[show rules table]")
+            });
+            $("#rules").tablesorter({sortList:[[2,1]]});
+
+             $("#awards").tablesorter({sortList:[[0,1]]})
+             .tablesorterPager({container: $("#pager2"),positionFixed:false});
+
+
+
+        }
+    );
+ </script>
+{{content}}
+
+{% load auto_extras %}
+{% if rules %}
+
+
+    <h3>R&D Awards Rules</h3>
+
+    <p>
+        These are the ways to obtain R&D. Free points can be assigned in the
+
+        <a href="{% url app.views.vehicle_r_and_d %}">R&D Investment</a> screen.
+        All other points are assigned based on the acheivement of goals.</p>
+    <a href="" class="toggle_rules">[show rules table]</a><br>
+
+    <div id="rules_div">
+    <br>
+    <table id="rules">
+    <thead>
+    <tr><th>Name</th><th>Description</th><th>Area</th><th>Quantity</th> </tr>
+    </thead>
+    <tbody>
+    {% for r in rules %}
+    <tr>
+        <td>{{r.name}}</td>
+        <td>{{r.desc}}</td>
+        <td>{{r.area|capfirst}}</td>
+        <td>{{r.points|capfirst}}</td>
+
+    </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endif %}
+<a href="" class="toggle_rules"></a><br>
+</div>
+
+
+<h3>R&D Awards</h3>
+These are the R&D awards received.
+<table id="awards">
+    <thead>
+    <tr><th>Year</th><th>Name</th><th>Area</th><th>Points</th></tr>
+</thead>
+    <tbody>
+    {% for a in awards %}
+
+    <tr>
+        <td>{{a.turn|to_year}}</td>
+        <td>{{a.rule.name }}</td>
+        <td>{{ a.rule.area|capfirst }}</td>
+        <td>{{a.points|capfirst}}</td>
+
+
+    </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+{% include "global/pager2.html" %}
+
+
+{% endblock %}

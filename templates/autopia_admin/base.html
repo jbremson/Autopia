@@ -1,0 +1,22 @@
+{% include 'global/includes/header.html' %}
+
+
+ <form action="./advance/" method="POST">{% csrf_token %}
+        <input type="submit" value="Advance Turn">
+</form>
+
+   <br>
+
+<form action="/reset_start/" method="POST">{% csrf_token %}
+    <input type="submit" value="Reset Turn Start Time">
+</form>
+<br>
+
+<form action="./reset_game/" method="POST" onsubmit="return confirm('This is irreversible. Continue?');">
+
+    {% csrf_token %}
+     <input type="submit" value="Reset Game To First Turn">
+</form>
+
+
+{% include 'global/includes/footer.html' %}

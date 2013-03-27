@@ -1,0 +1,16 @@
+<ul id="navmenu-h">
+    <li><a href="/home">{{ user.username|capfirst }} {{ year }}</a></li>
+    <li><a href="#">Private Screens</a>
+        <ul><li><a href="/home">Home</a></li>
+            <li><a href="/fp/build_refinery/">Build Refinery</a></li>
+            <li><a href="/fp/buy_refinery/">Buy Refinery</a></li>
+            <li><a href="/fp/transactions">Transaction Records</a></li>
+            <li><a href="{% url chat_log %}">Messaging</a></li>
+            <li><a href="/accounts/change_password/">Change Password</a></li>
+        </ul></li>
+
+   {%  include "global/global_nav.html" %}
+
+</ul>
+<br>
+<br>

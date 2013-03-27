@@ -1,0 +1,453 @@
+{% include 'global/includes/header.html' %}
+<head><title>Autobahn - Build Vehicle</title></head>
+
+{% block message %}
+    {{message}}
+{% endblock %}
+
+{% load auto_extras %}
+
+{% block content %}
+
+
+<script type="text/javascript" language="JavaScript">
+    // this is the drivetrain cost dict
+
+    var MY = {};
+    {% if vid %}
+         MY.vid = {{vid}};
+
+        {% else %}
+
+         MY.vid = undefined;
+    {% endif %}
+
+
+
+
+    function fix(input){ // convert 102.3349839000000000000009 to 102.33 - 2 decimal fix.
+        return (Math.round(input*100)/100)
+
+    }
+
+    function val_setter(css,django,def){//set val to its css id, django value or default
+                                        // , in that order. Return the value.
+        var val;
+        if (css != null && css != undefined && css !="" ){
+            val = $("#"+css).val()
+            if (val==""){
+                val = $("#"+css).text()
+            }
+        } else if (django != null && django != undefined && django !=""){
+            val = django
+        } else if (def != null && def !=undefined && def != ""){
+            val = def
+        } else {
+            val=-1
+        }
+
+        return val
+
+
+    }
+
+
+   function calc_attrs(){
+       //the updater - sets all values for the screen after any change event.
+       var s={}
+       s['drivetrain']=val_setter("drivetrain_select",'{{vehicle.drivetrain.name  }}',"gas");
+       s['performance']=val_setter("performance_select",'{{ vehicle.performance }}','{{ performance.base }}');
+       s['style']=val_setter("style_select",'{{ vehicle.style }}','{{style.base }}');
+       s['run']=val_setter("run",'{{ vehicle.run }}',250);
+       s['margin']=val_setter("margin",'{{ vehicle.margin }}',5.0);
+       s['name']=val_setter("name","NA","NA");
+       return s;
+
+
+
+   }
+
+    function total(){
+
+        var s=calc_attrs()
+        s['fxn']='update_attrs'
+        // this handles the copied vehicle scenario
+        // we need to get rid of the vid once the vehicle has been brought over
+        if (typeof(MY.vid)!=undefined){
+
+            s['vid']=MY.vid
+        }
+        $(function(){
+            $.get("{% url app.views.new_vehicle %}",s,
+             function(data){
+                 if (data==-1){
+                     alert("failed")
+                 }else{
+                 if (data.copied == true){
+                    MY.vid = undefined
+
+                 }
+                 $("#drivetrain_select").val(data.drivetrain).attr("selected","selected");
+                 change_val($("#drivetrain_cost"),fix(data.cost))
+                 change_val($("#base_mpg"),fix(data.base_mpg))
+                 change_val($("#style_cost"),fix(data.style_cost))
+                 change_val($("#style_mpg"),fix(data.style_mpg))
+                 change_val($("#performance_cost"),fix(data.performance_cost))
+                 change_val($("#performance_mpg"),fix(data.performance_mpg))
+                 change_val($("#view_cost"),fix(data.production_cost))
+                 change_val($("#mpg"),String(fix(data.mpg)) + data.mpg_msg)
+                 change_val($("#feebate_cost"),data.feebate_cost)
+                 change_price()
+                 }
+
+
+
+             },"json");
+
+          });
+
+        }
+
+
+    function check_name(){
+        str="#name"
+        s = {'fxn':'check_name','arg':$(str).val()};
+        $(function(){
+            $.get("{% url app.views.new_vehicle %}",s,
+             function(data){
+             if (data==-1){
+                alert("code failure")
+             } else {
+
+                data = JSON.parse(data)
+                if (data.status=="False"){
+                    $(str).val("")
+                    alert("Failed: " + data.msg)
+                    return false
+
+                }
+             }
+             })
+
+        });
+
+
+    }
+
+    function submit_car(){
+        s=calc_attrs()
+
+        out=confirm("Are you sure you want to build this vehicle?")
+        if (out==false){
+            return false
+        }
+
+        s['fxn']="submit"
+        {%  if vt %}
+            s['vt']= {{ vt }}
+
+        {% endif %}
+
+        $(function(){
+            $.post("{% url app.views.new_vehicle %}",s,
+             function(data){
+             data = JSON.parse(data)
+             if (data.status=="fail"){
+                alert(data.msg)
+             } else if (data.status=="pass") {
+                window.location="/home"
+
+
+            } else {
+                alert("Error: something unexpected happened.")
+            }
+
+
+             })
+
+        });
+
+
+    }
+      
+      function change_price(){
+
+             var margin=parseFloat($("#margin").val()/100)
+             var price = parseInt((1.0+margin)*parseFloat($("#view_cost").text()) + $("#feebate_cost").val())
+             $("#price").text(price)
+             var production_cost = fix(parseInt($("#view_cost").text()) * $("#run").val()/1000000)
+             $("#production_cost").text(production_cost)
+             var total_revenue = fix(price*$("#run").val()/1000000)
+             $("#total_profit").text(fix(total_revenue-production_cost))
+             cafe_calculate()
+
+
+      }
+
+      function cafe_calculate() {
+          //calculate the max cafe achievable given all vehicles are sold - best case scenario
+          var base_cafe = {{ user.max_cafe|NA_to_zero }}
+          var base_quantity = parseInt({{ next_turn_commitment }})
+          var run = parseInt($("#run").val())
+          var cafe_goal = parseFloat({{ next_cafe}})
+          var num =run  +  base_quantity
+          var mpg = parseFloat($("#mpg").html())
+
+          var midterm=0
+          if (base_cafe==0){
+              midterm = 0
+          } else {
+             midterm = (base_quantity/base_cafe)
+          }
+          var out = num / (midterm + (run/mpg))
+          $("#cafe_prediction").html(roundNumber(out,1))
+
+          var penalty = (cafe_goal - out) * 55 * num
+          if (penalty < 0){
+              penalty = 0
+          }
+          $("#cafe_penalty").html(roundNumber(penalty/1000000,2))
+
+      }
+
+
+      $(document).ready(function(){
+           $("#overbuild_msg").hide()
+          $(".attrs").change(function(){ total();});//runs when drivetrain,style,performance or run is changed
+
+          $("#name").change(function(){ check_name(); }); // check for legality of name
+          $("#submit_car").click(function(){ submit_car();});
+          $("#cafe_tip").tooltip({'offset':[0,40]})
+
+//          $(".colorfy_new_veh").focus(function(){
+//              $(this).css("background-color","white")
+//          })
+//          $(".colorfy_new_veh").change(function(){
+//              colorfy($(this).parent(),$(this).val())
+//          });
+
+          var dataTableConfig = {"bPaginate": false,"bInfo":false, "bFilter":false}
+          //$("#basic_vehicle_design").dataTable(dataTableConfig)
+         // $("#margin").change(function(){
+         //       change_price()
+         // });
+
+          {% if vehicle %}
+              $("#drivetrain_select").val('{{vehicle.drivetrain.name}}').attr("selected","selected")
+              $("#style_select").val('{{ vehicle.style }}').attr("selected","selected")
+              $("#performance_select").val('{{ vehicle.performance }}').attr("selected","selected")
+              $("#run").val('{{ vehicle.run }}').attr("selected","selected")
+              $("#margin").val('{{ vehicle.margin }}')
+              $("#name").val('{{ vehicle.name }}')
+          {% else %}
+            $("#run").val(250)
+            $("#margin").val(5)
+              out =  calc_attrs();
+          $("#drivetrain_select").val(out['drivetrain']).attr("selected","selected");
+          $("#performance_select").val(out['performance']).attr("selected","selected");
+          $("#style_select").val(out['style']).attr("selected","selected");
+          $("#run").val(out['run']).attr("selected","selected");
+
+          {% endif %}
+
+          total()
+          //setInterval("change_price();",1000)
+
+          if ({{user.capacity }} <= {{ next_turn_commitment}}){
+              $("#vehicle_form").hide()
+              $("#overbuild_msg").show()
+
+              
+          }
+
+
+      })
+
+
+      document.body.onkeypress = function (event) {
+            event = event || window.event;
+            if (event.keyCode == 13) {
+                return false;
+            }
+           return true;
+        }
+</script>
+
+    <style>
+       table table { border-collapse: collapse}
+       select {font-size: 14px}
+       #cafe_calculator {table-layout:fixed; width: 140px; margin:5px;border-color: #d3d3d3; border-style: solid; border-width: 1px}
+       #cafe_calculator td{padding-left: 10px; padding-top:5px; border-color:#d3d3d3; border-style: solid; border-width: 1px}
+
+    </style>
+
+    <table class="main_table">
+        <tr><td>
+            <div class="bound_div">
+                {% include "vp/includes/base_info.html" %}
+            </div>
+        </tr></td>
+        <form name="vehicle" >
+            {% csrf_token %}
+            <tr><td>
+                <div class="bound_div">
+                    <div class="med_type"> Vehicle Design </div>
+                    <div id="overbuild_msg">
+                        You are at your vehicle build limit. <a href="/home#delete">Delete</a> vehicles from next turn to build more.
+
+                    </div>
+
+                    <div id="vehicle_form" style="">
+
+                       <div style="float:left">
+                        <table id="basic_vehicle_design">
+                            <thead><tr ><th style="width:70px"></th><th style="width:120px">Setting</th><th style="width:60px">Cost</th><th style="width:40px">MPG</th></tr></thead>
+                            <tr class="odd"><td title="See drivetrain abbreviations in the opposite table.">Drivetrain </td>
+                                <td style="width=20px">
+                                <select name="drivetrain" class="attrs" id="drivetrain_select" >
+                                    {% for d in drivetrains %}
+                                        <option value="{{d.id}}" >{{d.name}}
+                                    {% endfor %}
+
+                                </select>
+                            </td>
+                                <td>   <div id="drivetrain_cost"></div>
+
+                                </td>
+
+                                <td><div id="base_mpg"></div></td>
+                            </tr>
+                            <tr> <td title="The appearance and amenities of the vehicle.">Style </td>
+                                <td> <select class="attrs" name="style" id="style_select" >
+                                    <script>
+                                        var i = 0;
+                                        for (i={{ style.min }};i<={{ style.max }}; i += 1){
+                                            if (i=={{ style.base }}){
+
+                                                document.writeln("<OPTION selected='selected'>"+i+"</OPTION>");
+                                            } else {
+                                                document.writeln("<OPTION>"+i+"</OPTION>");
+
+                                            }
+
+                                        }
+
+                                    </script></select></td>
+                                <td><div id="style_cost">0</div></td>
+                                <td> <div id="style_mpg">0</div></td></tr>
+                            </tr>
+
+                            <tr class="odd"><td title="Vehicle power.">Performance</td>
+                                <td ><select name="performance" class="attrs" id="performance_select" >
+                                    <script>
+                                        var i = 0;
+                                        for (i={{ performance.min }};i<={{ performance.max }}; i += 1){
+                                            if (i=={{ performance.base }}){
+
+                                                document.writeln("<OPTION selected='selected'>"+i+"</OPTION>");
+                                            } else {
+                                                document.writeln("<OPTION>"+i+"</OPTION>");
+
+                                            }
+                                        }
+                                    </script>
+
+                                </select></td>
+                                <td> <div id="performance_cost">0</div></td>
+                                <td><div id="performance_mpg">0</div></td>
+                            </tr>
+                        {% if feebates %}
+                            <tr>
+                                <td title="A fee/rebate applied to the vehicle to make less fuel efficient vehicles help subsidize more efficient vehicles.">Feebate Cost</td><td></td>
+                                <td><div id="feebate_cost"></div></td>
+                                <td></td>
+                            </tr>
+                        {% endif %}
+
+                            <!-- <tr><td>Emissions</td><td><div id="em_type"></div><input type="text" size="2" value="0" name ="base_emissions" class="disabled_box"></td>
+
+                         </td>
+                           <td><input type="text" value="0" name ="emissions_cost" class="disabled_box"></td>
+                           <td></td>
+                 </tr>           -->
+                            <tr title="Sum of costs times volume scaling factor times number produced i.e. (dt.cost+perf.+style)*c*n" style="background-color:salmon"><td>Totals </td><td title="Increase your production runs to decrease your build costs.">
+                                    Production Volume
+                                <select name="run" id="run" class="attrs">
+                                    <script>
+                                        var r
+                                        for (r={{step}}; r<= {{ max }}; r+={{ step }})
+                                            if (r=='{{ vehicle.run }}'){
+
+                                                document.writeln("<option value="+ r + " selected='selected'>" + r +"</option>")
+
+                                            } else {
+                                                document.writeln("<option value="+ r + ">" + r +"</option>")
+                                            }
+                                    </script>
+                                </select>
+
+
+                            </td><td><div id="view_cost"></div></td>
+                                <td><div id="gas_guzzler"></div><div id="mpg"></div></td>
+                            </tr>
+                        </table>
+
+                        <input type="hidden" name="parent" value="0">
+                        <!-- <input type="hidden" name="emissions" id="emis_id" value="0">    -->
+                        <input type="hidden" name="production_cost">
+                        <input type="hidden" name="mult">
+                        <input type="hidden" name="price">
+                       </div> <!-- vsplit table -->
+                        <span style="float:left; margin-top:15px; width:150px; margin-left:20px; height:160px; background-color:yellow;" class="rounded">
+                            <table id="cafe_calculator" >
+
+                            <thead>
+                            <tr><th colspan=2 id="cafe_tip" title="Provides a prediction of your CAFE penalty given that you sell all of your vehicles.">
+                                Fleet CAFE Calculator[?]</th></tr>
+                            </thead>
+                            <tbody>
+                            <tr><td>CAFE Prediction</td><td> <span id="cafe_prediction"></span></td></tr>
+                            <tr><td>CAFE Goal</td> <td>{{ next_cafe }}</td></tr>
+                            <tr><td>Penalty</td><td> $<span id="cafe_penalty"></span>M<br></td></tr>
+                            </tbody>
+                             </table>
+                        </span>
+                      <div style="float:left"> <!-- vsplit table -->
+                        <table id="additional_info">
+                          <tr class="odd"><td>Set Name</td><td><input type="text" name="name" size="20" id="name" value="{{ vehicle.name }}"></td></tr>
+
+                            <tr><td title="Set a margin to determine sales price e.g. 5%">Set Margin</td><td>
+                                <input id="margin" type="text" size=4>% </td></tr>
+                            <tr class="odd"><td>Set Price</td><td><div id="price"></div></td></tr>
+                            <tr><td>Total Cost</td><td><span id="production_cost"></span> M</td></tr>
+                            <tr class="odd"><td title="Total profit if all vehicles sold at this margin">Total Profit</td>
+                                <td><span id="total_profit"></span> M</td></tr>
+                            <tr><td></td><td><input class="button" type="button" value="Build" id="submit_car"></td></tr>
+                        </table>
+
+        </form>
+                    </div>
+                </div>
+              </div> <!-- vsplit -->
+            </td></tr>
+    <tr><td>
+
+       <div class="bound_div" >
+
+     <div class="med_type">Drivetrain Abbreviations Glossary</div>
+    {% include "global/drivetrain_abbrev.html" %}
+
+
+
+  </div>
+</tr></td>
+    </table>
+
+
+
+{% endblock %}
+
+
+
+
+

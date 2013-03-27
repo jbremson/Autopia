@@ -1,0 +1,219 @@
+{% include 'global/includes/header.html' %}
+
+       <head>
+
+            <title>Consumer Home</title>
+        </head>
+<script>
+
+
+
+    $(document).ready(function()
+        {
+            $("#scores").hide()
+            var api = new jGCharts.Api();
+            //2) options
+            {% autoescape off %}
+
+             $("#scoreme").dataTable();
+
+            var player_profile={ data: {{ profile_data }}, size:'400x200',type: 'p', axis_labels:{{ profile_labels }}, legend:[] };
+
+            var opt = {data: {{ fuel_history }}, size:'300x200', type: 'bvs', axis_labels:{{ history_labels }},
+                bar_width:30, legend:{{ history_legend }}};//set options
+            var cost = {data: {{ fuel_cost }}, size:'300x200', type: 'bvs', axis_labels:{{ history_labels }},
+                  bar_width:30, legend:{{ history_legend }}};//set options
+
+
+
+            {% endautoescape %}
+            //3) append img
+            $('<img>').attr('src', api.make(opt)).appendTo("#fuel_history");
+
+             $('<img>').attr('src', api.make(cost)).appendTo("#fuel_cost");
+
+             $('<img>').attr('src', api.make(player_profile)).appendTo("#player_profile"); 
+
+             $(".helper").tipsy();
+
+            $("#score_detail").click(function(){
+                $("#scores").show(speed="fast")
+
+            } );
+
+            var loc = $("#container").position()
+            var height = $("#container").height()
+            $("#the_rest").css({'top':loc.top+height+50, 'left':'40px', 'position':'absolute'})
+
+            $("#scores").click(function(){
+
+               $("#scores").hide(speed="fast") 
+            });
+        }
+    )
+
+        
+ 
+</script>
+
+{%  load auto_extras %}
+
+<style type="text/css">
+    .lefty{display: block; background-color: white;float: left; width: 50%; height:310px }
+    .righty{display: block; background-color: white;float: right; width: 50%; height:310px}
+
+    #score_detail{text-decoration:underline}
+    #scores{position:absolute; left:150px;
+        background:lightblue; top:20px; height: 400px;
+        z-index:10; }
+
+        #container{
+        position: absolute;
+        left:40px;
+        top:120px;
+        width: 600px;
+            margin: auto;
+              padding:0;
+              display: table;
+              /** border: 1px solid black; **/
+              }
+
+    .row{
+        display: table-row;
+    }
+
+    .left {
+            width:400;
+            padding:1em;
+            background: #EEF;
+            display: table-cell;
+            opacity:1
+            }
+
+        .right {
+            width:200;
+            padding:1em;
+            background:#FEE;
+        display: table-cell;
+            opacity:1;
+    }
+</style>
+
+
+    <div id="container">
+        <div class="row">
+            <div class="left" style="border-radius-topleft:15px; -moz-border-radius-topleft:15px; background:#DDD">
+                {%  for prompt in prompts %}
+                    <p>{{ prompt.message }}</p>
+
+                {%  endfor %}
+            </div>
+            <div class="right" style="background:#DDD; border-radius-topright:15px; -moz-border-radius-topright:15px"></div>
+
+        </div>
+     <div class="row">
+          <div class="left" style="border-radius-bottomleft:15px;-moz-border-radius-bottomleft:15px">
+              {% include 'consumer/includes/user_info.html' %}
+          </div>
+
+         <div class="right" style="border-radius-bottomright:15px; -moz-border-radius-bottomright:15px">
+
+             Total Score: {{ user.sum_score }} <a id="score_detail">[Score Detail View]</a>
+         </div>
+
+     </div>
+    </div> <!-- container end -->
+<div id="the_rest">
+<div class="lefty">
+    <h3>Overview</h3>
+<p>
+{{ user.desc }}
+</p>
+
+{% for prompt in prompts %}
+   <p>
+       {{ prompt.message }}
+   </p>
+
+{% endfor %}
+
+<p>
+
+Vehicle purchase quota (remaining to buy this turn): {{ user.turn_vehicle_goal }}  <br>
+
+
+<a href="{% url view_fleet %}" class="tipsy" title="Click to see your fleet info.">Total Fleet Size: {{ user.fleet_size }}</a><br>
+<a href="#" class="tipsy" title="Player's average vehicle should cost about this much.">
+    Target Average Vehicle Price:</a> {{ user.base_car_cost }}
+</p>
+
+
+
+</div>
+
+<div class="righty">
+<h3>Profile</h3>
+This consumer's preference profile. 
+<div id="player_profile"></div>
+</div>
+
+
+
+<!-- ========== Consumer Scoring System =======   -->
+
+
+
+
+      <div class="lefty">
+      <h3>Fuel Volume History (000's of gge)</h3>
+         
+      <div id="fuel_history"></div>
+
+
+      </div>
+
+      <div  class="righty">
+      <h3>Fuel Expenditures ($ 000's) </h3>
+      <div id="fuel_cost"></div>
+
+
+     </div>
+
+
+
+<div id="scores">
+
+        <div style="float:right; color:white">[x] </div>
+        <h3>Score History</h3>
+
+        <table id="scoreme" class="tablesorter">
+        <thead><tr><th>Year</th>
+            <th>Style</th><th>Performance</th>
+            <th>MPG</th><th>Quota %</th>
+            <th>Score</th></tr>
+        </thead>
+
+        <tbody>
+            {% for cs in my_scores %}
+                 <tr><td>{{ cs.year }}</td>
+                 <td>{{ cs.style|floatformat:0 }}</td><td>{{ cs.performance|floatformat:0 }}</td>
+                 <td>{{ cs.mpg|floatformat:0}}</td><td>{{ cs.quota|percentage }}</td><td>{{ cs.final }}</td>
+                 </tr>
+
+
+            {% endfor %}
+        </tbody>
+        </table>
+
+</div>
+
+   
+  
+
+{% include 'global/includes/unclosed_footer.html' %}
+
+
+
+</div> <!-- end of the_rest div -->
+</body>
+</html>

@@ -1,0 +1,22 @@
+
+ Player: {{username}}<br>
+            Year: {{year}} <br>
+            Group: {{group}}<br>
+            Funds: ${{balance|floatformat:"2"}} M<br>
+ {% comment %}
+
+            {% if cafe %}
+                Current <a class="tipsy" title="Corporate Average Fuel Economy - government mandated fuel economy for the vehicles you sell. Missing this will incur a penalty.">CAFE</a>: {{cafe}} MPG - Turn goal (to avoid penalty) {{ cafe_goal }} <br>
+                <a class="tipsy" title="The goals you will have to meet to avoid fuel economy penalties in coming years.">Coming CAFE goals: {{ next_cafes }} </a> <br>
+
+            {% endif %}
+            {% if market_size %}
+
+                <a name="evs"></a>
+                <a href="#evs" class="tipsy" title="An estimation of how many vehicles consumers will buy next turn.">
+                    Expected Vehicle Market Size:</a> {{ market_size }} units <br>
+               <a href="#evs" class="tipsy" title="Number of vehicles I have committed to build for next turn.">
+                  My Next Turn Commitment:
+               </a>  {{ next_turn_commitment }} units<br>
+              {% endif %}
+              {% endcomment %}

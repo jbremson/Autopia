@@ -1,0 +1,119 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  
+
+
+<script type="text/javascript" language="javascript" src="/site_media/jgcharts.pack.js">
+	</script>
+        <script type="text/javascript" language="javascript" src="/site_media/jquery.tablesorter.min.js">
+	</script>
+
+<script type="text/javascript" language="javascript" src="/site_media/jquery.curvycorners.min.js">
+</script>
+	        <script type="text/javascript" language="javascript" src="/site_media/jquery.dimensions.min.js">
+	</script>
+
+	<script type="text/javascript" language="javascript" src="/site_media/jquery.tablesorter.pager.js">
+	</script>
+          <script type="text/javascript" language="javascript" src="/site_media/tipsy/javascripts/jquery.tipsy.js">
+
+	</script>
+
+              <script type="text/javascript" language="javascript" src="/site_media/jquery.field.min.js">
+	</script>
+
+   
+        <link rel="stylesheet" href="/site_media/tipsy/stylesheets/tipsy.css" type="text/css" />
+          <link rel="stylesheet" href="/site_media/css.css" type="text/css" />
+
+
+    <script type="text/javascript">
+             function change_val(str,val){
+            // changes element str.text to val
+            $(str).hide()
+            $(str).text(val)
+            $(str).show()
+     }
+
+
+    </script>
+
+</head>
+<body>
+    {% load cache %}
+    {% load auto_extras %}
+	{% block header %}
+
+
+	<img border="0" height="60" width="600" src="/site_media/img/autopia.png">
+	<div class="spacer"></div>
+	 {% endblock %}<br>
+
+    {% include user.nav_file %}
+{% comment %}
+   {% block user_info %}
+	{% if username %}
+	<div class="main_text">
+        {% include "global/includes/user_info.html" %}
+
+
+
+
+           
+
+ 
+     </div>
+    {% endif %}
+   {% endblock %}
+
+{% endcomment %}
+	{% block message %} {% if message %}{{message}}{% endif %} {% endblock %}
+	<div class="content">
+	{% block content %}content {% endblock %}
+	</div>
+
+
+
+	{% block footer %}<div class="big_spacer"></div>
+	
+	{% endblock %}
+
+
+
+
+     <div style="border-radius:50px; -moz-border-radius:50px; float:left;background-color:aqua;width:300px; height:70px">
+     The following players have completed their turns:<br>
+
+     {% if finished %}
+     {% for player in finished %}
+         <b>{{  player.user.username }}</b> &nbsp;
+     {% endfor %}
+     {% endif %}
+
+     <br>
+     <form action="{% url complete %}" method="POST">{% csrf_token %}
+         <input type="submit" value="Complete Turn">
+        </form>
+
+     </div>
+
+        <div style="background-color:gold;width:200px;float:left;height:70px">
+            Make a <a href="{% url comment %}">comment.</a>
+
+    </div>
+
+
+    <br>
+    <div style="float:left">
+    <p>
+    <a href="http://autopia2010.com:8081/auto" target="_blank">Bug Tracker</a>
+</p></div>
+
+</body>
+</html>

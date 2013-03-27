@@ -1,0 +1,99 @@
+{% include 'global/includes/header.html' %}
+        <head><title>Buy Refinery</title></head>
+{%include 'consumer/includes/user_info.html' %}
+
+<h1>Refineries for Sale</h1>
+
+     {% load auto_extras %}
+<script>
+
+    function pre_ref(self,id){
+        var out = $("#buy_"+id).position()
+        var x = out.left
+        var y = out.top
+        $("#ref_id").val(id)
+        $("#show_me").css('position','absolute')
+        $("#show_me").css("left",x)
+        $("#show_me").css("top",y)
+        $("#show_me").css("height",100)
+        $("#show_me").css("width",200)
+        $("#show_me").css("background-color","#E1E8EF")
+        $("#show_me").css({"border-style":'solid','border-width':'2px'})
+        $("#show_me").show('fast')
+    }
+
+    function buy_ref(){
+        //Run the post here - send the id
+        var send = {'fxn':'buy_refinery','arg':$("#ref_id").val()}
+
+        $.post("{% url app.views.buy_refinery %}",send,
+                function(data){
+                    if (data < 0){
+                        alert("failed " + data + '')
+                    } else {
+                        window.location="/home"
+                    }
+                    $("#show_me").hide('fast')
+
+
+
+                })
+
+    }
+
+    $(document).ready(function()
+        {
+
+            $("#refs").dataTable();
+
+            $(".building").each(function(i,item){
+                $(item).css("background-color","#E0EEE0")
+
+            })
+            $(".{{ user.username }}_button").attr("disabled","disabled")
+
+        }
+    );
+
+</script>
+
+<div id="show_me" style="display:none">
+    Buy this?<br>
+    <div id="ref_id"></div>
+    <input type="button" onclick="buy_ref()" value="Yes">
+    <input type="button" onclick="$('#show_me').hide('fast');" value="Cancel">
+
+
+</div>
+<div id="block">
+<table id="refs">
+<thead><tr><th>Owner</th><th>Fuel</th><th>Size</th><th>Capacity</th>
+    <th>Price</th><th>Life Remaining</th></th><th>Margin</th><th>Buy</th></tr>
+</thead>
+<tbody>
+{% for ass in assets  %}
+     <tr
+     {% if ass.activation_turn > turn %}
+         class="building"
+     {% else %}
+         class="active"
+      {% endif %}
+             ><td><div class="send_message_link">{{ ass.owner.username }}</div></td><td>{{ ass.refinery.fuel|capfirst }}</td>
+         <td><span style="display: none;">{{ ass.refinery.size }}k</span>{{ ass.refinery.name }}</td>
+         <td>{{ ass.refinery.capacity }} k gge</td><td>{{ ass.sale_price}} k</td><td class="warn_expiry">
+
+     {{ ass.activation_turn|life_remaining}} {{ ass.activation_turn|is_inactive }}</td><td>{{ ass.refinery.margin }}</td><td>
+             <input type="button" id="buy_{{ ass.id }}" class="{{ ass.owner.username }}_button" onclick="pre_ref(self,{{ ass.id }});" value="Buy {{ ass.refinery.name|capfirst}} {{ass.refinery.fuel|capfirst}} Ref.">
+     </td></tr>
+
+{% endfor %}
+
+
+</tbody>
+
+
+</table>
+</div>
+
+        {% include 'global/includes/footer.html' %}
+

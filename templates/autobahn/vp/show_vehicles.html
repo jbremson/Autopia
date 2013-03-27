@@ -1,0 +1,119 @@
+{% extends "vp/base.html" %}
+
+
+{% block usernav %}
+{% include user.nav_file %}
+{% endblock %}
+
+{% block content %}
+
+{% if veh_models %}
+<table class="sortable">
+    <tr><th>Drivetrain</th><th>MPG</th><th>Style</th><th>Performance</th>
+        <th>Emissions</th>
+        <th>Base Cost</th>
+        <th>Select</th></tr>
+
+{% for v in veh_models %}
+<tr><td>{{v.drivetrain.name}}</td>
+    <td>{{v.mpg}}</td><td>{{v.style}}</td><td>{{v.performance}}</td>
+    <td>{{v.emissions}}</td>
+    <td>{{v.cost}}</td>
+  
+    <td><form action="." method="POST">
+        {% csrf_token %}
+            <input type="hidden" name="id" value="{{v.id}}">
+    <input type="submit" value="Inspect"></form></td>
+</tr>
+
+
+
+
+
+{% endfor %}
+</table>
+{% endif %}
+
+{% if prod %}
+
+<h3>
+    Drivetrain: {{vehicle.drivetrain.name}}<br>
+    Base MPG: {{vehicle.mpg}}<br>
+    Base Cost: {{vehicle.cost}}<br>
+</h3>
+
+<table class="sortable">
+    <tr><th>Run</th><th>Multiplier</th><th>Min Units</th>
+        <th>Max Units</th><th>MPG</th><th>Production Cost</th>
+        <th>Build</th></tr>
+    {% for vp in prod %}
+    <tr><td>{{vp.name}}</td>
+        <td>{{vp.multiplier}}</td>
+        <td>{{vp.min}}</td>
+        <td>{{vp.max}}</td>
+        <td>{{vp.mpg}}</td>
+        <td>{{vp.production_cost}}</td>
+        <td><form action="../confirm_build/" method="GET">
+
+                <input type="hidden" name="mpg" value="{{vp.mpg}}">
+                <input type="hidden" name="cost" value="{{vp.production_cost}}">
+                <input type="hidden" name="vp_name" value="{{vp.name}}">
+                <input type="hidden" name="vp_id" value="{{vp.id}}">
+                <input type="hidden" name="drivetrain" value="{{vehicle.drivetrain.name}}">
+                <input type="hidden" name="drivetrain_id" value="{{vehicle.drivetrain.id}}">
+                <input type="hidden" name="min" value="{{vp.min}}">
+                <input type="hidden" name="max" value="{{vp.max}}">
+               
+             
+                <input type="submit" value="Select for build">
+            </form></td>
+    </tr>
+
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if confirm %}
+<h1>Confirm Vehicle Build</h1>
+
+<h3>Drivetrain: {{drivetrain}}<br>
+    MPG: {{mpg}}<br>
+    Cost: {{cost}}<br>
+    Level: {{level}}<br>
+
+    <br>
+    This is a <i>{{vp_name}}</i> run.<br>
+    You must produce this many units: {{min}}<br>
+    You can produce this many units total: {{max}}<br>
+
+    Total maximum loss is ${{min_cost}}M. (You sell no cars of this model. Bad.)<br>
+    Total maximum cost is ${{max_cost}}M. (You sell out your capacity of this vehicle. Good.)<br>
+    You will be charged ${{unit_penalty}} for each unit of shortfall<br>
+    to the minimimum ({{min}}).
+
+    
+   
+    <form method="POST" action=".">
+        {% csrf_token %}
+    Enter name here:{{veh_form.name}}<br>
+    Enter price here:{{veh_form.price}}<br>
+
+
+
+    <input type="hidden" name="drivetrain" value="{{drivetrain_id}}">
+    <input type="hidden" name="production_cost" value="{{cost}}">
+    <input type="hidden" name="mpg" value="{{mpg}}">
+    <input type="hidden" name="run" value="{{level_id}}">
+    <input type="hidden" name="final" value="true">
+    <input type="submit" value="Build Vehicle">
+    </form>
+
+
+
+</h3>
+{% endif %}
+
+
+
+
+{% endblock %}

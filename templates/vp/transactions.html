@@ -1,0 +1,91 @@
+{% include 'global/includes/header.html' %}
+        <head><title>Transactions</title></head>
+
+{# Normal Autopia Version #}
+
+<script>
+    $(document).ready(function()
+
+        {
+            $("#mytable").dataTable()
+            $("#other").dataTable()
+
+        }
+    );
+ </script>
+
+    {% include "vp/includes/base_info.html" %}
+
+ <h3>Vehicle Transaction Records (Current Turn)</h3>
+{% if vehicle_sales %}
+
+
+
+    <table id="mytable">
+    <thead>
+    <tr><th>Buyer</th><th>Vehicle</th><th>Year</th><th>Quantity</th><th>Type</th><th>Amount</th>
+    <td>Copy</td>
+    </tr>
+    </thead>
+    <tbody>
+    {% for v in vehicle_sales %}
+    <tr>
+        <td>{{v.buyer.username}}</td>
+        <td>{{v.vehicle}}</td>
+        <td>{{v.year}}</td>
+        <td>{{v.quantity}}</td>
+        <td>{{v.account }}</td>
+        <td> {{v.amount|floatformat:"3"}} M</td>
+          <form action="/vehicle/new_vehicle/{{v.vehicle.id}}/" method="GET">
+                 <td> <INPUT TYPE="submit" value="Copy {{v.vehicle.name}} for next turn."
+                 </td>
+          </form>
+
+
+    </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+    -None-
+
+{% endif %}
+
+
+
+
+
+<h3>Other Transactions</h3>
+<table id="other">
+    <thead>
+    <tr><th>Year</th><th>Payer</th><th>Payee</th><th>Description</th><th>Comment</th><th>Amount</th></tr>
+</thead>
+    <tbody>
+    {% for v in vehicle_penalties %}
+
+    {% ifequal username v.buyer.username %}
+
+       <tr class="red_tr">
+    {% else %}
+
+    <tr>
+    {% endifequal %}
+        <td>{{v.year}}</td>
+        <td>{{v.buyer }}</td>
+        <td>{{ v.seller }}</td>
+        <td>{{v.desc}}</td>
+        <td>{{v.comment }}</td>
+        <td>{{v.amount|floatformat:"3"}}M</td>
+
+
+    </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+
+
+
+{% include 'global/includes/footer.html' %}

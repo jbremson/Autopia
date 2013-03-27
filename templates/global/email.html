@@ -1,0 +1,27 @@
+           {% extends "base.html" %}
+                   <head><title>Email List</title></head>
+
+{% block usernav %}
+{% include user.nav_file %}
+{% endblock %}
+
+{% block content %}
+<h1> Join the Autopia notification email list.</h1>
+
+<h3>This low traffic list is used to provide news and information related to Autopia. Your address
+will not be shared.</h3>
+
+<form method="POST">{% csrf_token %}
+
+ {{ message }} <br>
+Email Address: <input type="text" name="email" length="40"></input>
+
+<br>
+
+
+<input type="submit" value="Submit Email" onClick="alert('Thanks for your interest in Autopia!');">
+
+</form>
+
+
+{% endblock %}

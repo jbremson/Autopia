@@ -1,0 +1,14 @@
+<ul>
+<li>Funds Available: ${{balance|floatformat:"2"}} M </li>
+{#<li><a href="/vp/vehicle_r_and_d/" class="tipsy" title="Invest RD points.">RD Points: {{ user.rd_points }}</a> <!--({{earned_rd }} earned this turn )--></li>#}
+<li>Total Production Capacity: {{user.capacity}}</li>
+<li>Vehicles I'm Building For Next Turn: {{ next_turn_commitment }}</li>
+{#<li>Expected consumer vehicle demand for next turn: {{ market_size }}#}
+{#<li>Current CAFE: {{ cafe }} (Goal {{this_cafe}} )#}
+{#<li>Next Turn Max Possible CAFE: {{user.max_cafe}}  (Goal {{next_cafe}})#}
+{#    {% if user.check_messages %}#}
+{#    <div style="color:red"><a href="/chat_log">***New Messages***</a></div></li>#}
+{##}
+{#    {% endif %}#}
+</ul>
+    

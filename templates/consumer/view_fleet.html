@@ -1,0 +1,52 @@
+{%include 'global/includes/header.html' %}
+<script>
+    $(document).ready(function()
+
+        {
+            $("#my_vehicles").dataTable()
+            });
+
+  
+
+</script>
+
+{%include 'consumer/includes/user_info.html' %}
+
+{% load auto_extras %}
+<head>
+    <title>My Fleet</title>
+    
+</head>
+<h3>My Fleet</h3>
+<table id="my_vehicles">
+    <thead>
+        <tr><th>Vehicle</th><th>Producer</th><th class=\"{sorter: 'digit'}\">Age</th><th>Drivetrain</th><th>Fuel</th>
+                <th>MPG</th>
+                <th>Style</th><th>Performance</th>
+                <th>Quantity</th><th>Vehicle Annual Fuel Usage (gge)</th>
+                <th>Sum Annual Fuel Usage(gge)(000's)</th>
+                <th>Annual VMT (000's)</th><th>Sum Annual VMT (000's)</th></tr>
+    </thead>
+    <tbody>
+        {% for f in fleet_view %}
+                <tr><td>{{f.vehicle.name}}</td>
+                <td><div class="send_message_link">{{f.vehicle.producer}}</div></td>
+                <td>{{f.vehicle.age}}</td>
+                <td>{{f.vehicle.drivetrain.name}}</td>
+                <td>{{f.fuel}}</td>
+                <td>{{f.vehicle.mpg|floatformat:0}}</td>
+                <td class="colorfy">{{f.vehicle.style}}</td>
+                <td class="colorfy">{{f.vehicle.performance}}</td>
+              
+                <td>{{f.quantity}}</td>
+                <td>{{f.annual_fuel_consumption|floatformat:0}}</td>
+                <td>{{f.annual_sum_consumption|k_round}}</td>
+                <td>{{f.annual_vmt|k_round}}</td>
+                <td>{{f.annual_sum_vmt|floatformat:0}}</td>
+                </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+{% include 'global/includes/footer.html' %}

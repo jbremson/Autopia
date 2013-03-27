@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+<head>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>base</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Joel Bremson">
+
+
+
+	<style type="text/css">
+	body
+	{
+                font-family: "Geneva", "Verdana", Sans-Serif;
+		background-color:white;
+                color:#002546;
+                font-size:1em;
+                font-weight:bold;
+               
+	}
+
+        table.nav {
+            border: none;
+            border-width: 1px 1px 1px 1px;
+		border-spacing: 2px;
+             background-color:#2d75b5;
+            
+        }
+
+        div.spacer{
+            height: 5px;
+            width: 100px;
+        }
+        
+        table.global_nav {
+            border: none;
+            border-width: 1px 1px 1px 1px;
+		border-spacing: 2px;
+             background-color:#ae5700;
+
+
+        }
+
+
+       table.global_nav th,td{
+            border: solid;
+              border-width: 1px 1px 1px 1px;
+              padding: 5px;
+		border-collapse:collapse;
+                color: #002546;
+                font-weight: bold;
+
+        }
+
+        .nav tbody tr:hover td
+	{
+		background: #d2a25f;
+	}
+
+        .global_nav tbody tr:hover td
+	{
+		background: #d2a25f;
+	}
+
+        table.std tbody tr:hover td
+        {
+            background:#d2a25f;
+        }
+
+        a.tipsy { color:#002546;
+                font-size:1em;}
+        
+        table.nav th,td {
+            border: solid;
+              border-width: 1px 1px 1px 1px;
+              padding: 5px;
+		border-collapse:collapse;
+                 color:#002546;
+                 font-weight:bold;
+
+        }
+
+        .nav a{
+            color:#002546;
+        }
+
+        .global_nav a{
+            color:#002546;
+        }
+      
+        table th {
+            border: solid;
+            border-collapse:collapse;
+            border-width: 1px;
+            padding: 0px;
+            color:#002546;
+        }
+
+        .helper {
+            color:#002546;
+        }
+
+	div.header
+	{
+
+		  	BACKGROUND-COLOR: #b0c4de;
+	}
+	div.content
+	{
+		  	
+		
+	}
+	div.warning_message
+	{
+			BACKGROUND-COLOR: #FF6666;
+			font-size: 150%;
+	}
+	
+        .silver_box table{
+		border-width: 1px 1px 1px 1px;
+		border-spacing: 2px;
+                border_style: solid;
+		border-color: #d2ac35 #d2ac35 #d2ac35 #d2ac35;
+		border-collapse: separate;
+		background-color: white;
+	}
+
+        .silver_box table th,td{
+            border_style: solid;
+            border-color: black;
+
+        }
+
+	
+	
+	#rounded-corner
+	{
+		font-family: "Verdana", Sans-Serif;
+		font-size: 12px;
+		margin: 45px;
+		width: 480px;
+		text-align: left;
+		border-collapse: collapse;
+                color: #002546;
+	}
+	
+	#rounded-corner th
+	{
+		padding: 8px;
+		font-weight: normal;
+		font-size: 13px;
+		color:  #d2b65f;
+		background: #143450;
+	}
+	#rounded-corner td
+	{
+		padding: 8px;
+                color:  #d2b65f;
+		background: #143450;
+	
+		border-top: 1px solid #fff;
+	}
+
+        #rounded-corner a
+        {
+            color: #d2b65f;
+        }
+	
+	#rounded-corner tbody tr:hover td
+	{
+		background: #2d75b5;
+	}
+
+	
+       
+        div.silver_box {background-color:white;
+                        border-style:solid;
+                        border-width:1px;
+                        width:700px;
+                        color:#00386B;
+                        }
+
+        div.silver_box h3 { 
+            color:#00386B;
+        }
+
+
+            h3 {font-size: 20px;}
+
+    .fuel_border {border-style:double; background-color: white; padding: 2px 10px}
+    #gas {position: absolute; top: 270px; left:52px;}
+    #gas_title {position: absolute; top: 240px; left: 52px}
+
+    #diesel {position: absolute; top: 270px; left:132px;}
+     #diesel_title {position: absolute; top: 240px; left: 132px}
+
+    #h2 {position: absolute; top: 270px; left:215px;}
+    #h2_title {position: absolute; top: 240px; left: 215px}
+    #elec {position: absolute; top: 270px; left:309px;}
+    #elec_title {position: absolute; top: 240px; left:309px;}
+
+    #fuel_data {position: absolute; top: 440px; left: 310px;}
+    #fuel_caption{position: absolute; top: 353px; left:171px}
+    #graph{position: absolute; top: 450px; left:52px; background-color:white}
+    #graph_caption{position:absolute; left:183px; top: 682px; background-color:white}
+	</style>
+        <script>
+            $(document).ready(function()
+            {
+                $(".disabled_box").attr("disabled","disabled");
+                $(".disabled_box").css("background-color","transparent");
+                 $(".disabled_box").css("border","0px solid white");
+                 $(".disabled_box").css("color","#002546");
+                 $(".disabled_box").attr("size",8);
+
+
+
+            }
+
+         )
+         //word starts with a letter and has no spaces
+         var word_reg = new RegExp("^[a-zA-Z][\d\w]*");
+
+           
+        </script>
+</head>
+<body>
+  
+   
+   {% block content %}{% endblock%}
+ 
