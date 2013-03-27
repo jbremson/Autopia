@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Gauge demo</title>
+		<!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
+		<script type="text/javascript" src="../gauge.js"></script>
+		<style type="text/css">
+			#test_default, #test_custom, #test_medium, #test_small {
+				border: 1px solid #333;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="sizingTests">
+			<canvas id="test_default" width="250" height="250"></canvas>
+			<canvas id="test_custom" width="250" height="250"></canvas>
+			<canvas id="test_medium" width="175" height="175"></canvas>
+			<canvas id="test_small" width="100" height="100"></canvas>
+		</div>
+		<div id="otherTests">
+			<canvas id="test_overflow_min" width="200" height="200"></canvas>
+			<canvas id="test_overflow_max" width="200" height="200"></canvas>
+			<canvas id="test_random_update" width="200" height="200"></canvas>
+			<canvas id="test_custom_bands" width="200" height="200"></canvas>
+		</div>
+		<script type="text/javascript">
+
+			// Helper to execute a function after the window is loaded,
+			// see http://www.google.com/search?q=addLoadEvent
+			function addLoadEvent(func) {
+				var oldonload = window.onload;
+				if (typeof window.onload != 'function') {
+					window.onload = func;
+				} else {
+					window.onload = function() {
+						if (oldonload) {
+							oldonload();
+						}
+						func();
+					}
+				}
+			}
+
+			addLoadEvent( function() {
+				var options, gm, gms, testOverflowMin, testOverflowMax,periodicRand;
+
+				// Draw the gauge using default settings
+				new Gauge( document.getElementById( 'test_default' ) );
+
+				// Draw the gauge using custom settings
+				options = {
+					value: 60,
+					label: 'Hello!',
+					unitsLabel: '' + String.fromCharCode(186),
+					min: 50,
+					max: 200,
+					majorTicks: 4,
+					minorTicks: 3, // small ticks inside each major tick
+					greenFrom: 50,
+					greenTo: 75,
+					yellowFrom: 95,
+					yellowTo: 150,
+					redFrom: 150,
+					redTo: 200
+				};
+				new Gauge( document.getElementById( 'test_custom'), options );
+
+				// Draw the gauge using custom settings (medium)
+				options = {
+					value: -60,
+					label: 'Hello!',
+					unitsLabel: ' %',
+					min: -100,
+					max: 100,
+					majorTicks: 4,
+					minorTicks: 3, // small ticks inside each major tick
+					greenFrom: -10,
+					greenTo: 10,
+					greenColor: '#00FF00', // full green
+					yellowFrom: 10,
+					yellowTo: 30,
+					yellowColor: '#FFFF00', // full yellow
+					redFrom: 30,
+					redTo: 100,
+					redColor:  '#FF0000' // full red
+				};
+				gm = new Gauge( document.getElementById( 'test_medium'), options );
+				gm.setValue( 80 );
+
+				// Draw the gauge using custom settings (small)
+				options = {
+					value: 10,
+					label: 'Hello!',
+					min: 10,
+					max: 11,
+					majorTicks: 4,
+					minorTicks: 3, // small ticks inside each major tick
+					greenFrom: 10.5,
+					greenTo: 10.6,
+					yellowFrom: 10.6,
+					yellowTo: 10.7,
+					redFrom: 10.7,
+					redTo: 11
+				};
+				gms = new Gauge( document.getElementById( 'test_small'), options );
+				gms.setValue( 10.55 );
+
+				// Draw gauge and use overflow values (min)
+				testOverflowMin = new Gauge( document.getElementById( 'test_overflow_min' ), {label: "Overflow min"});
+				testOverflowMin.setValue(-10);
+
+				// Draw gauge and use overflow values (max)
+				testOverflowMax = new Gauge( document.getElementById( 'test_overflow_max' ), {label: "Overflow max"});
+				testOverflowMax.setValue(110);
+
+				periodicRand = new Gauge( document.getElementById( 'test_random_update' ), {label: "Updates"});
+				setInterval(function() {
+					periodicRand.setValue( Math.floor(Math.random()*100) );
+				}, 3000);
+
+				// Draw gauge and use custom bands
+				testCustomBands = new Gauge( document.getElementById( 'test_custom_bands' ),
+				{
+					label: "Custom bands",
+					bands: [
+						{ color: '#ccc', from: 0, to: 10 },
+						{ color: '#bbb', from: 10, to: 20 },
+						{ color: '#aaa', from: 20, to: 30 },
+						{ color: '#999', from: 30, to: 40 },
+						{ color: '#888', from: 40, to: 50 },
+						{ color: '#777', from: 50, to: 60 },
+						{ color: '#666', from: 60, to: 70 }
+					]
+				});
+			} );
+		</script>
+	</body>
+</html>
